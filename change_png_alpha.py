@@ -40,10 +40,35 @@ def set_border_to_black(image_path):
     print("done..")
 
 
+def change_rgb_size(image_path):
+    # 打开原始图片
+    image = Image.open(image_path)
+
+    # 获取图片的宽度和高度
+    width, height = image.size
+
+    # 创建一个新的图片对象，与原始图片大小相同
+    new_image = Image.new('RGB', (width, height))
+
+    # 遍历每个像素点，将RGB值除以20，并设置到新的图片对象中
+    for x in range(width):
+        for y in range(height):
+            r, g, b = image.getpixel((x, y))
+            r = r // 20
+            g = g // 20
+            b = b // 20
+            new_image.putpixel((x, y), (r, g, b))
+    # 保存新的图片
+    new_image.save('output/testlidar_result.jpg')
+    print('done.')
 
 
-# 调用函数处理图片
-# process_image("srcImg/arrowblack.png")
+if __name__ == "__main__":
+    # 调用函数处理图片
+    # process_image("srcImg/arrowblack.png")
 
-# 调用函数并传入图片路径
-set_border_to_black("srcImg/map.jpg")
+    # 调用函数并传入图片路径
+    # set_border_to_black("srcImg/map.jpg")
+
+    # 调整像素值，最大值不超过13
+    change_rgb_size("srcImg/testlidar.jpg")
