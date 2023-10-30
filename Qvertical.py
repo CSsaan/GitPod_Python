@@ -6,10 +6,8 @@ Author: swortain
 Date: 2021-12-31 17:45:22
 LastEditTime: 2022-01-22 14:40:25
 '''
-import itertools
 import matplotlib.pyplot as plt
 import numpy as np
-import glob
 import cv2
 
 def load_reshape_img(file_path):
@@ -39,7 +37,7 @@ def get_result_img(img, size_y):
             depth = round(img[h][w]/255*size_y) # 0-1500cm
         #    depth = round(depth/10)   ## 把毫米转为厘米进行绘图
             vertical[depth][w] += intensity*rate
-    vertical = cv2.resize(vertical, )
+    # vertical = cv2.resize(vertical, (int(height * 2), int(width * 2)))
     return vertical
 
 def save_result(result_vertical, save_dir = "./output/10meter.png"):
