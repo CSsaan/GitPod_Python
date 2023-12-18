@@ -21,7 +21,7 @@ def getDivisors(n) :
 
 
 
-cube_file = open("Canon C-Log.cube","r")
+cube_file = open("EA_Cinematic_Lut2.cube","r")
 
 title = None
 lut_size = None
@@ -85,5 +85,5 @@ for r in range(0,int(height/lut_size)):
                 c_data = c_data+1
 
 #im.show() #For testing
-im.save("out.png")
+im.save("output/out.png")
 print("File created successfully.")

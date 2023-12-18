@@ -25,7 +25,7 @@ def get_result_img(img, size_y):
     size_y (int): 需要生成的结果波形图的高
     return: 结果波形图
     """
-    intensity = 0.11 # 累加亮度值
+    intensity = 5.11 # 累加亮度值
     rate = 1.3 # 亮度倍率
     # 现在用厘米为格子数，1500cm为15m
     vertical = np.zeros((size_y+1, img.shape[1]), dtype=float)
@@ -42,7 +42,7 @@ def get_result_img(img, size_y):
 
 def save_result(result_vertical, save_dir = "./output/10meter.png"):
     result = result_vertical.astype(np.uint8)
-    result = cv2.equalizeHist(result)
+    # result = cv2.equalizeHist(result)
     cv2.imwrite(save_dir, result, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
     print("saved result:", save_dir, ", size:",result.shape)
 
