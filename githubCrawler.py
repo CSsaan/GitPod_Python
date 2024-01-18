@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import json
 import os
-import zipfile
+import zipfile	
+import gradio as gr
 
 # print('begin crawler GitHub!')
 
@@ -290,8 +291,22 @@ class ReadmeFileReader:
             content = self.get_one_readme_file(project_dir)
             # print(content)
 
+all_unzip_dir = []
+def run_crawler(data_range, use_topN, save_zip_dir, unzip_dst_dir):
+    # save_zip_dir = os.getcwd() + "/downZip"
+    # unzip_dst_dir = os.getcwd() + "/unZip"
+    crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
+    crawler.run(use_topN)
+    all_unzip_dir = crawler.all_unzip_dir
+    # return all_unzip_dir
+
+def read_readme_files(all_unzip_dir, use_topN):
+    reader = ReadmeFileReader(all_unzip_dir)
+    reader.get_all_readme_files(use_topN)
+    return "Readme files read successfully."
+
 if __name__ == "__main__":
-    # trending top N
+    # load trending top N
     use_topN = 2
     '''
     # download Github Trending("daily", "weekly", "monthly") projects zips & unzip.
@@ -311,13 +326,42 @@ if __name__ == "__main__":
     reader.get_all_readme_files(use_topN) # use_topN(n for topN, 0 for all)
 
     '''
-    # README.md content to AI Model(ChatGLM3\ChatGPT3.5...)
+    # TODO pass README.md content to AI Model(ChatGLM3\ChatGPT3.5...) -> 25 in 1
     '''
-    
-    
+
+    '''
+    # TODO new README.md or HTML (local picture)
+    '''
+
+    '''
+    # TODO upload to wechat or blog
+    '''
 
 
 
+    # if(False):
+    #     save_zip_dir = os.getcwd() + "/downZip"
+    #     unzip_dst_dir = os.getcwd() + "/unZip"
+    #     with gr.Blocks() as demo:
+    #         gr.HTML("""<h1 align="center">Github Crawler with ChatGLM3 Demo</h1>""")
+    #         chatbot = gr.Chatbot()
+    #         with gr.Row():
+    #             with gr.Column(scale=4):
+    #                 # with gr.Column(scale=4):
+    #                 #     save_zip_dir = gr.File(label="Select Save Zip Folder", type='filepath', show_label=False, container=False)
+    #                 #     unzip_dst_dir = gr.File(label="Select Unzip Folder", type='filepath', show_label=False, container=False)
+    #                 with gr.Column(min_width=16, scale=1):
+    #                     submitBtn = gr.Button("Run Crawler")
+    #             with gr.Column(scale=2):
+    #                 emptyBtn = gr.Button("Read README Files")
+    #                 use_topN = gr.Slider(0, 25, value=1, step=1.0, label="Use Trending topN", interactive=True)
+    #                 # top_p = gr.Slider(0, 1, value=0.8, step=0.01, label="Top P", interactive=True)
+    #                 # temperature = gr.Slider(0.01, 1, value=0.6, step=0.01, label="Temperature", interactive=True)
+    #         emptyBtn.click(lambda _: run_crawler("daily", use_topN, save_zip_dir, unzip_dst_dir))
+    #         emptyBtn.click(lambda _: read_readme_files(all_unzip_dir, use_topN))
+    #         # emptyBtn.click(lambda: None, None, chatbot, queue=False)
+    #     demo.queue()
+    #     demo.launch(server_name="127.0.0.1", server_port=8501, inbrowser=True, share=False)
 
 
 
