@@ -106,6 +106,26 @@ import zipfile
 
 
 class GitHubCrawler:
+    """
+    GitHubCrawler类用于爬取GitHub上的趋势项目，并下载和解压项目的zip文件。
+
+    初始化参数：
+    - data_range: 数据范围，可选值为"daily", "weekly", "monthly"。
+    - save_zip_dir: 下载zip文件的保存目录，默认为当前工作目录下的/downZip目录。
+    - unzip_dst_dir: 解压zip文件的目标目录，默认为当前工作目录下的/downZip目录。
+
+    方法：
+    - getTrendingList: 获取GitHub趋势项目的链接列表。
+    - find_zipball_url: 在JSON数据中查找zip文件的下载链接。
+    - getMainZipUrl: 获取项目的main分支zip文件下载链接。
+    - downMainZip: 下载项目的main分支zip文件。
+    - unzipMainZip: 解压项目的zip文件。
+    - run: 运行爬虫，下载和解压项目的zip文件。
+
+    使用示例：
+    crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
+    crawler.run(use_topN, save_zip_dir, unzip_dst_dir)
+    """
     def __init__(self, data_range, save_zip_dir=None, unzip_dst_dir=None):
         print(f"begin crawler GitHub! \n data_range: {data_range}")
         # https://github.com/trending?since=daily
@@ -219,34 +239,22 @@ class GitHubCrawler:
 
         print("\n------------------[4]. 读取每个项目的readme文件内容-----------------------")
 
-# def get_one_readme_file(project_dir):
-#     readme_file = next((file for file in os.listdir(project_dir) if file.lower() == 'readme.md'), None)
-#     content = None
-#     if readme_file is not None:
-#         with open(os.path.join(project_dir, readme_file), 'r') as f:
-#             content = f.read()
-#     else:
-#         print(f'{project_dir}:No readme file found.')
-#     if(content != None):
-#         print(f"[have readme file content: {os.path.join(project_dir, readme_file)}]")
-#     else:
-#         print(f"[read readme content filed: {os.path.join(project_dir, readme_file)}]")
-#     return content
 
-# def get_all_reafme_files(use_topN, all_unzip_dir):
-#     '''
-#     # use_top(n for topN, 0 for all)
-#     '''
-#     if(use_topN != 0):
-#         all_unzip_dir = all_unzip_dir[:use_topN]
-#     else:
-#         all_unzip_dir = all_unzip_dir[:]
-#     print(f"共有{len(all_unzip_dir)}个项目, 分别是：")
-#     list(map(lambda x: print(x), all_unzip_dir))
-#     for project_dir in all_unzip_dir:
-#         content = get_one_readme_file(project_dir)
-#         # print(content)
 class ReadmeFileReader:
+    """
+    ReadmeFileReader类用于读取指定目录中的readme文件内容。
+
+    初始化参数：
+    - all_unzip_dir: 一个包含项目目录的列表，默认为None。如果未提供该参数，将使用当前工作目录下的/downZip目录。
+
+    方法：
+    - get_one_readme_file: 读取指定项目目录中的readme文件内容。
+    - get_all_readme_files: 读取所有项目目录中的readme文件内容。
+
+    使用示例：
+    reader = ReadmeFileReader(all_unzip_dir)
+    reader.get_all_readme_files(use_topN)
+    """
     def __init__(self, all_unzip_dir=None):
         print("init ReadmeFileReader")
         if not isinstance(all_unzip_dir, list):
@@ -298,12 +306,14 @@ if __name__ == "__main__":
     '''
     # read downloaded projects README.md files.
     '''
-    # all_unzip_dir = crawler.all_unzip_dir
-    # get_all_reafme_files(use_topN, all_unzip_dir)
-
     all_unzip_dir = crawler.all_unzip_dir
     reader = ReadmeFileReader(all_unzip_dir)
     reader.get_all_readme_files(use_topN) # use_topN(n for topN, 0 for all)
+
+    '''
+    # README.md content to AI Model(ChatGLM3\ChatGPT3.5...)
+    '''
+    
     
 
 
