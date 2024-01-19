@@ -124,8 +124,8 @@ class GitHubCrawler:
     - run: 运行爬虫，下载和解压项目的zip文件。
 
     使用示例：
-    crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
-    crawler.run(use_topN, save_zip_dir, unzip_dst_dir)
+    - crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
+    - crawler.run(use_topN, save_zip_dir, unzip_dst_dir)
     """
     def __init__(self, data_range, save_zip_dir=None, unzip_dst_dir=None):
         print(f"begin crawler GitHub! \n data_range: {data_range}")
@@ -136,7 +136,7 @@ class GitHubCrawler:
             print(f'{data_range} not in ["daily", "weekly", "monthly"], use default "daily"')
             data_range = "daily"
         self.pageUrl = "https://github.com/trending?since=" + data_range
-
+        self.all_names = []
         self.trendingList = []
         self.all_zip_dir = []
         self.all_unzip_dir = []
@@ -192,6 +192,7 @@ class GitHubCrawler:
         match = re.search(r"\/([^\/]+)\/?$", url)
         if match:
             content = match.group(1)
+            self.all_names.append(content)
             saved_dir = f"{dst_dir}/{content}.zip"
             with open(saved_dir, "wb") as f:
                 f.write(response.content)
@@ -218,7 +219,7 @@ class GitHubCrawler:
             self.unzip_dst_dir = unzip_dst_dir
 
         print("\n--------------------[1]. trending页面所有项目网址链接--------------------")
-        trendingList = crawler.getTrendingList(self.pageUrl)
+        trendingList = self.getTrendingList(self.pageUrl)
         if(use_topN != 0):
             self.trendingList = trendingList[:use_topN]
         else:
@@ -228,17 +229,17 @@ class GitHubCrawler:
 
         print("\n------------------------[2]. 每个项目下载zip----------------------------")
         for project_url in self.trendingList:
-            saved_dir = crawler.downMainZip(project_url, self.save_zip_dir)
+            saved_dir = self.downMainZip(project_url, self.save_zip_dir)
             self.all_zip_dir.append(saved_dir)
         print(f"\n[all downloaded zip dir]:{self.all_zip_dir}\n")
 
         print("\n-----------------------[3]. 解压每个项目的zip----------------------------")
         for zip_dir in self.all_zip_dir:
-            unzip_dir = crawler.unzipMainZip(zip_dir, self.unzip_dst_dir)
+            unzip_dir = self.unzipMainZip(zip_dir, self.unzip_dst_dir)
             self.all_unzip_dir.append(unzip_dir)
         print(f"\n[all unzipped project dir]:{self.all_unzip_dir}\n")
 
-        print("\n------------------[4]. 读取每个项目的readme文件内容-----------------------")
+        
 
 
 class ReadmeFileReader:
@@ -253,11 +254,13 @@ class ReadmeFileReader:
     - get_all_readme_files: 读取所有项目目录中的readme文件内容。
 
     使用示例：
-    reader = ReadmeFileReader(all_unzip_dir)
-    reader.get_all_readme_files(use_topN)
+    - reader = ReadmeFileReader(all_unzip_dir)
+    - reader.get_all_readme_files(use_topN)
     """
     def __init__(self, all_unzip_dir=None):
         print("init ReadmeFileReader")
+        self.all_name = []
+        self.all_content = []
         if not isinstance(all_unzip_dir, list):
             raise TypeError("all_unzip_dir should be a list")
         if(len(all_unzip_dir) == 0):
@@ -270,7 +273,7 @@ class ReadmeFileReader:
         readme_file = next((file for file in os.listdir(project_dir) if file.lower() == 'readme.md'), None)
         content = None
         if readme_file is not None:
-            with open(os.path.join(project_dir, readme_file), 'r') as f:
+            with open(os.path.join(project_dir, readme_file), 'r', encoding='utf-8') as f:
                 content = f.read()
         else:
             print(f'{project_dir}: No readme file found.')
@@ -288,26 +291,42 @@ class ReadmeFileReader:
         print(f"共有{len(self.all_unzip_dir)}个项目, 分别是：")
         list(map(lambda x: print(x), self.all_unzip_dir))
         for project_dir in self.all_unzip_dir:
+            project_name = re.search(r"/([^/]+)$", project_dir).group(1)
+            self.all_name.append(project_name)
             content = self.get_one_readme_file(project_dir)
+            self.all_content.append(content)
             # print(content)
 
-all_unzip_dir = []
-def run_crawler(data_range, use_topN, save_zip_dir, unzip_dst_dir):
-    # save_zip_dir = os.getcwd() + "/downZip"
-    # unzip_dst_dir = os.getcwd() + "/unZip"
-    crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
-    crawler.run(use_topN)
-    all_unzip_dir = crawler.all_unzip_dir
-    # return all_unzip_dir
+    def save_one_content(self, project_name, content, save_dir=None):
+        save_dir = (
+            save_dir if save_dir is not None else os.getcwd() + "/savedReadme"
+        )
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        for project_dir in self.all_unzip_dir:
+            # project_name = re.search(r"\/([^\/]+)\.zip$", zip_dir).group(1)
+            with open(f'{save_dir}/{project_name}.md', 'w', encoding='utf-8') as f:
+                f.write(content)
+                print(f'[have saved readme.md: {save_dir}/{project_name}.md]')
 
-def read_readme_files(all_unzip_dir, use_topN):
-    reader = ReadmeFileReader(all_unzip_dir)
-    reader.get_all_readme_files(use_topN)
-    return "Readme files read successfully."
+
+# all_unzip_dir = []
+# def run_crawler(data_range, use_topN, save_zip_dir, unzip_dst_dir):
+#     # save_zip_dir = os.getcwd() + "/downZip"
+#     # unzip_dst_dir = os.getcwd() + "/unZip"
+#     crawler = GitHubCrawler(data_range, save_zip_dir, unzip_dst_dir)
+#     crawler.run(use_topN)
+#     all_unzip_dir = crawler.all_unzip_dir
+#     # return all_unzip_dir
+
+# def read_readme_files(all_unzip_dir, use_topN):
+#     reader = ReadmeFileReader(all_unzip_dir)
+#     reader.get_all_readme_files(use_topN)
+#     return "Readme files read successfully."
 
 if __name__ == "__main__":
     # load trending top N
-    use_topN = 2
+    use_topN = 1
     '''
     # download Github Trending("daily", "weekly", "monthly") projects zips & unzip.
     '''
@@ -321,18 +340,21 @@ if __name__ == "__main__":
     '''
     # read downloaded projects README.md files.
     '''
+    print("\n------------------[4]. 读取每个项目的readme文件内容-----------------------")
     all_unzip_dir = crawler.all_unzip_dir
     reader = ReadmeFileReader(all_unzip_dir)
     reader.get_all_readme_files(use_topN) # use_topN(n for topN, 0 for all)
+    # reader.all_content
 
     '''
     # TODO pass README.md content to AI Model(ChatGLM3\ChatGPT3.5...) -> 25 in 1
     '''
-
+    print("\n-------------[5]. AI Model(ChatGLM3\ChatGPT3.5...)-----------------------")
     '''
     # TODO new README.md or HTML (local picture)
     '''
-
+    print("\n-----------------[6]. 保存每个readme文件AI输出内容------------------------")
+    reader.save_one_content(reader.all_name[0], reader.all_content[0], None)
     '''
     # TODO upload to wechat or blog
     '''
