@@ -79,6 +79,6 @@ class Basic:
 
 
 if __name__ == '__main__':
-    my_basic = Basic(os.getcwd() + "/Crawler/conf.toml")
+    my_basic = Basic(os.getcwd() + "/Crawler/utils/conf.toml")
     my_basic.get_wechat_token()
 
