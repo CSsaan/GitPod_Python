@@ -3,5 +3,6 @@ output/
 logs/
 video/
 downZip/
-unZip/
+Crawler/unZip/
+Crawler/savedReadme/
 savedReadme/
