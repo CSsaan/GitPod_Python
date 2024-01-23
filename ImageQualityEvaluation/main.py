@@ -10,6 +10,7 @@ if __name__ == "__main__":
     # 读取图像
     pngFile = "/workspace/GitPod_Python/ImageQualityEvaluation/dataset/face5.png"
     image = cv2.imread(pngFile)
+    # image[:, :, 1] = image[:, :, 1] + 8
     skin_image = RGBSkin(image)
 
     # 转LAB
@@ -19,21 +20,23 @@ if __name__ == "__main__":
 
     # 统计LAB中A/B
     width, height = skin_image.shape[:2]
-    summ_A, summ_B, summ_AB = 0, 0, 0
-    average_A, average_B, average_AB = 0, 0, 0
+    summ_L, summ_A, summ_B, summ_AB = 0, 0, 0, 0
+    average_L, average_A, average_B, average_AB = 0, 0, 0, 0
     i = 0
     for w in range(width):
         for h in range(height):
             if(_l[w, h] != 0.0):
                 i += 1
+                summ_L += _l[w, h]
                 summ_A += _a[w, h]
                 summ_B += _b[w, h]
                 summ_AB += (_a[w, h] + _b[w, h])*0.5
                 # print(f"wh:[{w} ,{h}]: {(_a[w, h] + _b[w, h])*0.5}")
+    average_L = summ_L/i
     average_A = summ_A/i
     average_B = summ_B/i
     average_AB = summ_AB/i
-    print(f"average_A:{average_A}, average_B:{average_B}, average_AB:{average_AB}")
+    print(f"average_L:{average_L}, average_A:{average_A}, average_B:{average_B}, average_AB:{average_AB}")
     
 
     # 显示结果图像

@@ -78,6 +78,8 @@ class ImageProcessingLab:
         img1 = self.normalHist(img1)
         # hist1 = plt.hist(img1.reshape(-1),bins=255,rwidth=0.85,range=(0,255))
         hist1 = cv2.calcHist([img1], [0], None, [256], [0, 256])
+        hist_list = hist1.flatten().tolist()
+        print(f"直方图列表长度: {len(hist_list)}")
         plt.plot(hist1, color='gray')
         plt.savefig(output_folder + '/normalHist.jpg')
         # return hist1
