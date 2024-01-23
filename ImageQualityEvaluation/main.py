@@ -18,7 +18,7 @@ if __name__ == "__main__":
     image_processor_lab = ImageProcessingLab(skin_image)
     _l, _a, _b = image_processor_lab.split_channels(output_folder)
 
-    # 统计LAB中A/B
+    # 统计LAB中L/A/B
     width, height = skin_image.shape[:2]
     summ_L, summ_A, summ_B, summ_AB = 0, 0, 0, 0
     average_L, average_A, average_B, average_AB = 0, 0, 0, 0
