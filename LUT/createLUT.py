@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 
 arr = np.zeros((156,4080,3))
@@ -35,6 +36,10 @@ for i in range(arr.shape[0]):
         #     arr[i][j][:] = np.array([60,242,254])
         # elif(253*16<j):
         #     arr[i][j][:] = np.array([45,47,238])
+        
+save_dir = os.getcwd() + "/LUT/output"
+if not os.path.exists(save_dir):
+    os.makedirs(save_dir)
 
-cv2.imwrite("falseLUT.jpg", arr,[cv2.IMWRITE_JPEG_QUALITY, 100])
+cv2.imwrite(save_dir + "/falseLUT.jpg", arr,[cv2.IMWRITE_JPEG_QUALITY, 100])
 print("done.")

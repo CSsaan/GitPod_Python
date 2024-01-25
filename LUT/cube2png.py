@@ -21,12 +21,12 @@ def getDivisors(n) :
 
 
 
-cube_file = open("EA_Cinematic_Lut2.cube","r")
+cube_file = open(os.getcwd() + "/LUT/input/Canon_C-Log.cube","r")
 
 title = None
 lut_size = None
-min = [None,None,None]
-max = [None,None,None]
+_min = [None,None,None]
+_max = [None,None,None]
 
 content = cube_file.read()
 content = content.strip()
@@ -47,14 +47,15 @@ if lut_size_re:
 min_re = re.search(r'DOMAIN_MIN (\d+\.\d+ \d+\.\d+ \d+\.\d+)', content)
 if min_re:
     min_re = min_re.group(1)
-    min = [float(x) for x in min_re.split(" ")]
+    _min = [float(x) for x in min_re.split(" ")]
 
 #Max
 max_re = re.search(r'DOMAIN_MAX (\d+\.\d+ \d+\.\d+ \d+\.\d+)', content)
 if max_re:
     max_re = max_re.group(1)
-    max = [float(x) for x in max_re.split(" ")]
+    _max = [float(x) for x in max_re.split(" ")]
 
+print(f'title:{title}, lut_size:{lut_size}, _min:{_min}, _max:{_max}')
 
 #Data
 data_re = re.findall(r'^\d+\.\d+ \d+\.\d+ \d+\.\d+', content, re.MULTILINE) #Find all matches
@@ -65,6 +66,7 @@ data = [tuple(int(x) for x in group) for group in data]
 
 
 quantity = len(data)
+print(f"quantity:{quantity}")
 divisors = getDivisors(quantity)
 if len(divisors) % 2 == 0:
     height = divisors[int((len(divisors)/2.0))-1]
@@ -73,6 +75,8 @@ else:
     height = divisors[int(math.floor(len(divisors)/2.0))]
     width = divisors[int(math.floor(len(divisors)/2.0))]
 size = (int(width), int(height))
+print(f"size:{size}")
+print(f'height,width:({height},{width})')
 
 im = Image.new(size=size,mode="RGB")
 
@@ -85,5 +89,5 @@ for r in range(0,int(height/lut_size)):
                 c_data = c_data+1
 
 #im.show() #For testing
-im.save("output/out.png")
+im.save(os.getcwd() + "/LUT/output/outLut.png")
 print("File created successfully.")
