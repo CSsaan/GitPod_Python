@@ -14,6 +14,7 @@ import toml
 
 class Basic:
     def __init__(self, conf_file):
+        self.firstTime = True
         self.confFile = conf_file
         self.confInfo = self.read_toml()
         self.appID = self.confInfo["basic"]["app_id"]
@@ -65,6 +66,10 @@ class Basic:
 
     # 判断token是否过期
     def which_token_over(self):
+        # 确保第一次可获取
+        if(self.firstTime):
+            self.firstTime = False
+            return True
         # 获取当前时间戳 -- 时间戳是自1970年1月1日午夜以来的秒数
         now_time = time.time()
         # 用当前时间戳减去getTokenTime，大于两个小时就判定失效

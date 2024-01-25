@@ -70,7 +70,7 @@ class ImageProcessingLab:
         c = img.min()
         d = img.max()
         img = (b-a)/(d-c)*(img-c)+a
-        img = img .astype(np.uint8)
+        # img = img .astype(np.uint8)
         return img
 
     def hist(self, img, output_folder):

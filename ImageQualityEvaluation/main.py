@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from skinSeg import RGBSkin
+from skinSeg import *
 from Rgb2CIELab import ImageProcessingLab
 
 
@@ -17,6 +17,14 @@ if __name__ == "__main__":
     output_folder = "/workspace/GitPod_Python/ImageQualityEvaluation/result"
     image_processor_lab = ImageProcessingLab(skin_image)
     _l, _a, _b = image_processor_lab.split_channels(output_folder)
+
+    # 直方图均衡化
+    _l = image_processor_lab.normalHist(_l)
+    _a = image_processor_lab.normalHist(_a)
+    _b = image_processor_lab.normalHist(_b)
+    cv2.imwrite(output_folder + '/l_channel_normal.jpg', _l)
+    cv2.imwrite(output_folder + '/a_channelnormal.jpg', _a)
+    cv2.imwrite(output_folder + '/b_channelnormal.jpg', _b)
 
     # 统计LAB中L/A/B
     width, height = skin_image.shape[:2]
@@ -37,7 +45,11 @@ if __name__ == "__main__":
     average_B = summ_B/i
     average_AB = summ_AB/i
     print(f"average_L:{average_L}, average_A:{average_A}, average_B:{average_B}, average_AB:{average_AB}")
-    
+
+    # 统计磨皮前后变化
+    diff = wrinkles(_l, '/workspace/GitPod_Python/ImageQualityEvaluation/result/wrinkles.jpg', "GaussianBlur") # 几种模糊"GaussianBlur"、"blur"、"medianBlur"、"bilateralFilter"
+    sum_diff = np.sum(diff) # 统计差值结果图像的像素和
+    print(f"磨皮磨去量：{sum_diff}")
 
     # 显示结果图像
     cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg.jpg', skin_image)
