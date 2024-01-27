@@ -7,8 +7,9 @@ def RGBSkin(my_texture):
     R = my_texture[:,:,2]
     G = my_texture[:,:,1]
     B = my_texture[:,:,0]
-    condition1 = (R > 95.0) & (G > 40.0) & (B > 20.0) & ((np.maximum(R, np.maximum(G, B)) - np.minimum(R, np.minimum(G, B)) > 15.0)) & (np.abs(R - G) > 15.0) & (R > G) & (R > B)
-    condition2 = (R > 200.0) & (G > 210.0) & (B > 170.0) & (np.abs(R - G) <= 15.0) & (R > B) & (G > B)
+    shift = 8.0 # 控制范围
+    condition1 = (R > 95.0 + shift) & (G > 40.0 + shift) & (B > 20.0 + shift) & ((np.maximum(R, np.maximum(G, B)) - np.minimum(R, np.minimum(G, B)) > 15.0 + shift)) & (np.abs(R - G) > 15.0 + shift) & (R > G) & (R > B)
+    condition2 = (R > 200.0 + shift) & (G > 210.0 + shift) & (B > 170.0 + shift) & (np.abs(R - G) <= 15.0 - shift) & (R > B) & (G > B)
     # result[condition1 | condition2] =  [255, 255, 255]
     result[~(condition1 | condition2)] = [0, 0, 0]  # 这里的[0, 0, 51, 255]对应vec4(0.0, 0.0, 0.2, 1.0)
     return result
@@ -31,7 +32,8 @@ def HSVSkin(my_texture):
     H = img_hsv[:,:,0]
     S = img_hsv[:,:,1]
     V = img_hsv[:,:,2]
-    condition = (H>=0.0) & (H<=20.0) & (S>=48.0) & (V>=50.0)
+    shift = 2.0 # 控制范围
+    condition = (H>=0.0 + shift) & (H<=20.0 - shift) & (S>=48.0 + shift) & (V>=50.0 + shift)
     # 满足skin_region条件，则是原图像素，否则是黑色
     img_skin[~(condition)] = [0, 0, 0]
     return img_skin
@@ -68,9 +70,10 @@ if __name__ == "__main__":
     pngFile = "/workspace/GitPod_Python/ImageQualityEvaluation/dataset/face5.png"
     image = cv2.imread(pngFile)
     # 调用RGBSkin函数进行mask获取
-    skin_image = HSVSkin(image)
+    skin_image = RGBSkin(image)
     # 显示结果图像
     cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg.jpg', skin_image)
+    print('saved png : ' + '/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg.jpg')
 
 
     
