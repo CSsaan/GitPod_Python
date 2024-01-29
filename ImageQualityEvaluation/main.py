@@ -1,4 +1,5 @@
 import cv2
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -50,17 +51,25 @@ def static_all(skin_image, use_HBS, hist_normal=False):
     '''
     all_A, all_B, all_AB = [], [], []
     hue_factor, brightness_factor, saturation_factor = 0.0, 1.0, 1.0
+    random_H, random_B, random_S = 0, 0, 0
     for shift in range(-10, 11, 2):
         # 设置调整参数
         if(use_HBS == 'H'):
+            # 生成-10至10之间的一个随机数
+            # random_H = random.uniform(-10, 10)
             hue_factor = 0.0 + shift  # 色相调整值，可以是负值
         if(use_HBS == 'B'):
+            # 生成-10至10之间的一个随机数
+            # random_B = random.uniform(-10, 10)
             brightness_factor = 1.0 + shift*0.05 # 亮度调整值，大于1增加亮度，小于1降低亮度
         if(use_HBS == 'S'):
+            # 生成-10至10之间的一个随机数
+            # random_S = random.uniform(-10, 10)
             saturation_factor = 1.0 + shift*0.05 # 饱和度调整值，大于1增加饱和度，小于1降低饱和度
         adjusted_image = adjust_image_hls(skin_image, hue_factor, brightness_factor, saturation_factor)
         adjust_name = f'h{hue_factor}_b{brightness_factor}_s{saturation_factor}'
         _, average_A, average_B, average_AB = skin_statistics(adjusted_image, adjust_name, hist_normal=hist_normal)
+        # sum_of_squares = random_H**2 + random_B**2 - random_S**2
         all_A.append((shift, average_A))
         all_B.append((shift, average_B))
         all_AB.append((shift, average_AB))
@@ -78,8 +87,9 @@ if __name__ == "__main__":
     cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg.jpg', skin_image)
 
     # 统计不同色度、亮度、饱和度的A\B\AB均值
-    mode = 'B' # Hue, Brightness, Saturation
-    all_A, all_B, all_AB = static_all(skin_image, use_HBS=mode, hist_normal=False)
+    mode = 'S' # Hue, Brightness, Saturation
+    hist_normal = True # False, True
+    all_A, all_B, all_AB = static_all(skin_image, use_HBS=mode, hist_normal=hist_normal)
     print("all_A: ", all_A)
     print("all_B: ", all_B)
     print("all_AB: ", all_AB)
@@ -91,7 +101,7 @@ if __name__ == "__main__":
     for i, dataset in enumerate(_ALL_):
         x, y = dataset[:, 0], dataset[:, 1]
         plt.scatter(x, y, color=colors[i], label=names[i]) # 绘制点
-        plt.plot(x, y, color=colors[i]) # 绘制曲线
+        plt.plot(x, y, color=colors[i]) # 绘制折线
         # 拟合曲线
         z = np.polyfit(x, y, 1)
         p = np.poly1d(z)
@@ -99,7 +109,9 @@ if __name__ == "__main__":
         
     plt.xlabel(f'shift of {mode}')
     plt.ylabel('Value')
-    plt.title('Skin LAB static, with shift of hue_factor, brightness_factor, saturation_factor')
+    # 定义一个字典
+    Titles = {'H': 'hue_factor', 'B': 'brightness_factor', 'S': 'saturation_factor'}
+    plt.title(f'Skin LAB static, with shift of {Titles[mode]}') # hue_factor, brightness_factor, saturation_factor
     plt.legend()
     plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt.jpg')
 

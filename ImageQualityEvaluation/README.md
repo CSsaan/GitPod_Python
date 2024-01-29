@@ -1,3 +1,33 @@
+# 亮度评估
+
+通过综合评估以上几个方面，可以全面了解图像的亮度情况，从而进行进一步的调整和处理。
+
+## 全局（环境）、局部（脸）
+1. **全局对比度：** 评估图像整体的亮度对比度，包括亮部和暗部的分布情况（直方图、波形图等）。
+2. **动态范围：** 评估图像的亮度动态范围，即图像中最亮和最暗部分的差异程度。
+3. **局部对比度：** 评估图像局部区域的亮度对比度，检查是否存在局部细节丢失或过度增强的情况。
+
+## 光的方向
+1. **环境光：** 评估图像中环境光的方向分布（主、辅灯等），包括相对光源的位置、方向上亮度情况。
+2. **脸部光：** 评估图像中人脸区域的光源方向分布，包括左右脸亮度分布、下巴亮度等情况。
+
+## 涉及直方图定量参数
+1. **均值（Mean）：** 表示图像亮度的平均水平，可以通过直方图来计算。
+2. **方差（Variance）：** 描述图像亮度值的分散程度，反映了图像亮度的变化、分散情况。
+3. **标准差（Standard Deviation）：** 是方差的平方根，同样描述图像亮度分布的常用参数。
+4. **偏度（Skewness）：** 描述了亮度分布的偏斜程度，即分布曲线的对称性。是统计数据分布偏斜方向和程度的度量，是统计数据分布非对称程度的数字特征。定义上偏度是样本的三阶标准化矩。
+               ![偏度（Skewness）](./images/Skewness.png)
+                  直方图的偏度（skewness）可以通过以下公式来计算：
+                  \[ \text{Skewness} = \frac{\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^3}{\left(\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2\right)^{\frac{3}{2}}} \]
+                  其中，\(x_i\) 是每个数据点，\(\bar{x}\) 是数据的均值，\(n\) 是数据点的数量。
+                  _这个公式计算了数据分布的偏斜程度，如果偏度为正，表示数据分布右偏（正偏），如果偏度为负，表示数据分布左偏（负偏），偏度为0表示数据分布大致对称_
+5. **峰度（Kurtosis）：** 描述了亮度分布的尖峭程度，即分布曲线的陡峭程度。表征概率密度分布曲线在平均值处峰值高低的特征数。直观看来，峰度反映了峰部的尖度。随机变量的峰度计算方法为：随机变量的四阶中心矩与方差平方的比值。
+               ![峰度（Kurtosis）](./images/Kurtosis.png)
+                  直方图的峰度（kurtosis）可以通过以下公式来计算：
+                  \[ \text{Kurtosis} = \frac{\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^4}{\left(\frac{1}{n} \sum_{i=1}^{n} (x_i - \bar{x})^2\right)^{2}} - 3 \]
+                  其中，\(x_i\) 是每个数据点，\(\bar{x}\) 是数据的均值，\(n\) 是数据点的数量。
+                  _这个公式计算了数据分布的峰度，如果峰度大于3，表示数据分布比正态分布更陡峭（尖峭峰），如果峰度小于3，表示数据分布比正态分布更平缓（平顶峰）_
+   
 # 肤色影响因素
 影像中皮肤颜色的表现受到多种因素的影响。以下是一些主要的因素：
 1. **光照条件：** 光照强度和光源的色温会显著影响皮肤颜色的表现。不同光照条件下，皮肤的色调和饱和度可能会发生变化。
@@ -9,7 +39,7 @@
 7. **摄影角度：** 摄影角度和拍摄距离也可能改变皮肤颜色在图像中的呈现方式。
 考虑到这些因素，理解和处理皮肤颜色时需要综合考虑多个影响因素，以获得准确和真实的皮肤颜色表现。
 
-# 肤色相关指标
+# 肤色相关指标参数
 评价皮肤的亮度情况可以通过观察图像中的皮肤部分并考虑一些指标：
 1. **对比度：** 观察皮肤和周围环境的对比度。亮度适中的皮肤应该在图像中清晰可见，而不应太过暗或过于亮眼。
 2. **细节保留：** 评估图像中皮肤部分的细节是否得以保留。过度调整亮度可能导致丢失皮肤细节，而不足的亮度可能使皮肤看起来暗淡。
@@ -50,20 +80,61 @@
 
 4. **统计分析方法 ：**
    - **基于LAB颜色空间：** 
-   - - 1. 脸部皮肤区域分割。
-   - - 2. RBG转LAB, 分离通道。
-   - - 3. 确定肤色线。在Lab颜色空间中，肤色线的角度通常是指a*轴和b*轴形成的线与水平轴的夹角。
-          因此，肤色线的角度为33度，可以表示为从a*轴到b*轴的方向。具体而言，这意味着在Lab颜色空间中，肤色在a*轴和b*轴的坐标为(a, b)。
-   - - 4. 统计与肤色线法线距离的均值、方差。
-   - - 5. 分析一致性。
-   - - 6. 分析不同亮度、色度下的相关关系。
+   - 1. 脸部皮肤区域分割。
+   - 2. RBG转LAB, 分离通道。
+   - 3. 对比试验：准备三通道原图与直方图均衡化后的结果图。
+   - 4. 统计LAB中A/B/Average_AB均值。
+   - 5. 分析一致性。
+   - 6. 分析不同亮度、色度下的相关关系，使用HSL来进行颜色调整。
+
+   皮肤分割：
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/face5.png" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/face5_skinSeg.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+   
+   从左至右依次是L\A\B通道（原图）：
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/lab/l_channel.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/lab/a_channel.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/lab/b_channel.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+   从左至右依次是L\A\B通道（直方图均衡化后）：
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/lab/l_channelnormal.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/lab/a_channelnormal.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/lab/b_channelnormal.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+
+   统计LAB中A/B/AB均值（原图）：
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/histNormal_false/LAB-brightness2.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/histNormal_false/LAB-hue3.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/histNormal_false/LAB-Saturation2.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+   统计LAB中A/B/AB均值（直方图均衡化后）：
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/histNormal_true/LAB-brightness2.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/histNormal_true/LAB-hue2.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/histNormal_true/LAB-Saturation2.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+   
    - **基于YCbCr颜色空间：** 
-   - - 1. 脸部皮肤区域分割。
-   - - 2. RBG转YCbCr, 分离通道。
-   - - 3. 对比试验：准备三通道原图与直方图均衡化后的结果图。
-   - - 4. 统计LAB中A/B/Average_AB均。
-   - - 5. 分析一致性。
-   - - 6. 分析不同亮度、色度下的相关关系。
+   - 1. 脸部皮肤区域分割。
+   - 2. RBG转YCbCr, 分离通道。
+   - 3. 确定肤色线。在Lab颜色空间中，肤色线的角度通常是指a*轴和b*轴形成的线与水平轴的夹角。
+          因此，肤色线的角度为33度，可以表示为从a*轴到b*轴的方向。具体而言，这意味着在Lab颜色空间中，肤色在a*轴和b*轴的坐标为(a, b)。
+   - 4. 统计与肤色线法线距离的均值、方差。
+   - 5. 分析一致性。
+   - 6. 分析不同亮度、色度下的相关关系。
+  
+
+## 直方图均衡化作用
+直方图均衡化是一种用于增强图像对比度的方法。它的作用包括：
+1. **增强图像对比度**：直方图均衡化可以使图像中的暗部和亮部细节更加突出，从而增强图像的对比度。
+2. **去除背景噪音**：通过拉伸图像的灰度级分布，直方图均衡化可以减少背景噪音的影响，使图像更清晰。
+3. **提高视觉效果**：直方图均衡化可以使图像看起来更加清晰和自然，提高视觉效果。
+4. **用于图像增强**：在图像处理中，直方图均衡化常用于增强图像的质量，使得图像更适合于后续的分析和处理。
 
 
 ## （a,b）点到肤色线法线距离：
