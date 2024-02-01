@@ -75,6 +75,33 @@ def static_all(skin_image, use_HBS, hist_normal=False):
         all_AB.append((shift, average_AB))
     return np.array(all_A), np.array(all_B), np.array(all_AB)
 
+import math
+def normpdf(x, sigma):
+    return 0.39894 * math.exp(-0.5 * x * x / (sigma * sigma)) / sigma
+def compute_gaussian():
+    if(0):
+        sigma = 4.0
+        first = normpdf(0.0, sigma)
+        for i in range(-5, 6):
+            weight = (normpdf(i / 11 * 15.0, sigma) / first - 0.5) * 1.02 + 0.5
+            print(f"{i}：{weight}")
+
+        all = [0.22860758600405096,
+                0.3925445766480955,
+                0.5946031963731924,
+                0.7984508533708166,
+                0.9524175519162079,
+                1.01,
+                0.9524175519162079,
+                0.7984508533708166,
+                0.5946031963731924,
+                0.3925445766480955,
+                0.22860758600405096]
+        all = np.array(all)
+        all = all * (1/6.9432)
+        print(all.sum())
+        print('')
+        print(all)
 
 if __name__ == "__main__":
     # ------------------------------------------------ 亮度 ------------------------------------------------
@@ -131,3 +158,8 @@ if __name__ == "__main__":
     sum_diff = np.sum(diff) # 统计差值结果图像的像素和
     print(f"磨皮磨去量：{sum_diff}")
     '''
+
+    # 计算正态分布高斯核
+    compute_gaussian()
+    
+
