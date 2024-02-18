@@ -13,6 +13,9 @@ import cv2
 def load_reshape_img(file_path):
     # 加载图片
     rawdata = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+    # opencv resize
+    rawdata = cv2.resize(rawdata, (1024, 1024))
+    
     # 将图片转换为单通道的NumPy数组
     rawdata = np.array(rawdata)
     print(rawdata.shape[0], rawdata.shape[1])
