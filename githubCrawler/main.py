@@ -336,9 +336,9 @@ class ReadmeFileReader:
 if __name__ == "__main__":
     # args
     parser = argparse.ArgumentParser(description='manual to this script')
-    parser.add_argument('--use_topN', type=int, default=2, help='load github trending top N (0 for all)')
-    parser.add_argument('--save_zip_dir', type=str, default="/downZip", help='save zips dir')
-    parser.add_argument('--unzip_dst_dir', type=str, default="/unZip", help='if your pc have cuda')
+    parser.add_argument('--use_topN', type=int, default=10, help='load github trending top N (0 for all)')
+    parser.add_argument('--save_zip_dir', type=str, default="/downZip", help='save zip files dir')
+    parser.add_argument('--unzip_dst_dir', type=str, default="/unZip", help='save unzip files dir')
     parser.add_argument('--data_range', type=str, default="daily", help=' "daily", "weekly", "monthly" ')
     args = parser.parse_args()
 
