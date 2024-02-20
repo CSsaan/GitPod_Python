@@ -333,10 +333,16 @@ class ReadmeFileReader:
 #     reader.get_all_readme_files(use_topN)
 #     return "Readme files read successfully."
 
+'''
+请用中文总结GitHub项目的readme.md文档的内容，并以亲切的语气写一篇技术分享博客，主要是分享的目前流行的项目。 要求介绍完项目名称后，就要给出项目地址是
+https://github.com/gptscript-ai/gptscript。
+保留后缀为.jpeg或者.png或者.jpeg等图片的路径，使得可正常加载图片。要求内容与原文不一样，给出详细的步骤说明，同时保留原图片路径，并输出成markdown格式，原始文档内容如下：
+'''
+
 if __name__ == "__main__":
     # args
     parser = argparse.ArgumentParser(description='manual to this script')
-    parser.add_argument('--use_topN', type=int, default=0, help='load github trending top N (0 for all)')
+    parser.add_argument('--use_topN', type=int, default=5, help='load github trending top N (0 for all)')
     parser.add_argument('--save_zip_dir', type=str, default="/downZip", help='save zip files dir')
     parser.add_argument('--unzip_dst_dir', type=str, default="/unZip", help='save unzip files dir')
     parser.add_argument('--data_range', type=str, default="daily", help=' "daily", "weekly", "monthly" ')
