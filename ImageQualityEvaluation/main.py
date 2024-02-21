@@ -111,7 +111,11 @@ if __name__ == "__main__":
     pngFile = "/workspace/GitPod_Python/ImageQualityEvaluation/dataset/face5.png"
     image = cv2.imread(pngFile)
     skin_image = RGBSkin(image)
-    cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg.jpg', skin_image)
+    # 闭运算(先膨胀后腐蚀, 填充漏分割的斑点)
+    kernel = np.ones((7, 7), np.uint8)
+    # opend_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_OPEN, kernel)
+    closed_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_CLOSE, kernel)
+    cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg', closed_skin_image)
 
     # 统计不同色度、亮度、饱和度的A\B\AB均值
     mode = 'S' # Hue, Brightness, Saturation
