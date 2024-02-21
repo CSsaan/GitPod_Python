@@ -199,7 +199,7 @@ class GitHubCrawler:
                 f.write(response.content)
                 print(f"downloaded: {content}.zip")
         branch_name = re.search(r'([^/]+)\.zip$', zip_url).group(1)
-        print("branch_name:", branch_name)
+        # print("branch_name:", branch_name)
         return saved_dir, branch_name
 
     def unzipMainZip(self, zip_dir, main_or_master, dst_dir):
@@ -342,7 +342,7 @@ https://github.com/gptscript-ai/gptscript。
 if __name__ == "__main__":
     # args
     parser = argparse.ArgumentParser(description='manual to this script')
-    parser.add_argument('--use_topN', type=int, default=5, help='load github trending top N (0 for all)')
+    parser.add_argument('--use_topN', type=int, default=0, help='load github trending top N (0 for all)')
     parser.add_argument('--save_zip_dir', type=str, default="/downZip", help='save zip files dir')
     parser.add_argument('--unzip_dst_dir', type=str, default="/unZip", help='save unzip files dir')
     parser.add_argument('--data_range', type=str, default="daily", help=' "daily", "weekly", "monthly" ')
