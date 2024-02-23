@@ -104,47 +104,47 @@ def compute_gaussian():
         print(all)
 
 if __name__ == "__main__":
-    # ------------------------------------------------ 亮度 ------------------------------------------------
-    # 【LAB颜色空间分析】
-    # ------------------------------------------------------------------------------------------------------
-    # 读取皮肤图像
-    pngFile = "/workspace/GitPod_Python/ImageQualityEvaluation/dataset/face5.png"
-    image = cv2.imread(pngFile)
-    skin_image = RGBSkin(image)
-    # 闭运算(先膨胀后腐蚀, 填充漏分割的斑点)
-    kernel = np.ones((7, 7), np.uint8)
-    # opend_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_OPEN, kernel)
-    closed_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_CLOSE, kernel)
-    cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg', closed_skin_image)
+    # # ------------------------------------------------ 亮度 ------------------------------------------------
+    # # 【LAB颜色空间分析】
+    # # ------------------------------------------------------------------------------------------------------
+    # # 读取皮肤图像
+    # pngFile = "/workspace/GitPod_Python/ImageQualityEvaluation/dataset/face5.png"
+    # image = cv2.imread(pngFile)
+    # skin_image = RGBSkin(image)
+    # # 闭运算(先膨胀后腐蚀, 填充漏分割的斑点)
+    # kernel = np.ones((7, 7), np.uint8)
+    # # opend_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_OPEN, kernel)
+    # closed_skin_image = cv2.morphologyEx(skin_image, cv2.MORPH_CLOSE, kernel)
+    # cv2.imwrite('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg', closed_skin_image)
 
-    # 统计不同色度、亮度、饱和度的A\B\AB均值
-    mode = 'S' # Hue, Brightness, Saturation
-    hist_normal = True # False, True
-    all_A, all_B, all_AB = static_all(skin_image, use_HBS=mode, hist_normal=hist_normal)
-    print("all_A: ", all_A)
-    print("all_B: ", all_B)
-    print("all_AB: ", all_AB)
+    # # 统计不同色度、亮度、饱和度的A\B\AB均值
+    # mode = 'S' # Hue, Brightness, Saturation
+    # hist_normal = True # False, True
+    # all_A, all_B, all_AB = static_all(skin_image, use_HBS=mode, hist_normal=hist_normal)
+    # print("all_A: ", all_A)
+    # print("all_B: ", all_B)
+    # print("all_AB: ", all_AB)
 
-    # 绘制多组点图\折线
-    colors = ['b', 'g', 'r']
-    names = ['Average_A', 'Average_B', 'Average_AB']
-    _ALL_ = [all_A, all_B, all_AB]
-    for i, dataset in enumerate(_ALL_):
-        x, y = dataset[:, 0], dataset[:, 1]
-        plt.scatter(x, y, color=colors[i], label=names[i]) # 绘制点
-        plt.plot(x, y, color=colors[i]) # 绘制折线
-        # 拟合曲线
-        z = np.polyfit(x, y, 1)
-        p = np.poly1d(z)
-        plt.plot(x, p(x), color=colors[i], linestyle='dashed')
+    # # 绘制多组点图\折线
+    # colors = ['b', 'g', 'r']
+    # names = ['Average_A', 'Average_B', 'Average_AB']
+    # _ALL_ = [all_A, all_B, all_AB]
+    # for i, dataset in enumerate(_ALL_):
+    #     x, y = dataset[:, 0], dataset[:, 1]
+    #     plt.scatter(x, y, color=colors[i], label=names[i]) # 绘制点
+    #     plt.plot(x, y, color=colors[i]) # 绘制折线
+    #     # 拟合曲线
+    #     z = np.polyfit(x, y, 1)
+    #     p = np.poly1d(z)
+    #     plt.plot(x, p(x), color=colors[i], linestyle='dashed')
         
-    plt.xlabel(f'shift of {mode}')
-    plt.ylabel('Value')
-    # 定义一个字典
-    Titles = {'H': 'hue_factor', 'B': 'brightness_factor', 'S': 'saturation_factor'}
-    plt.title(f'Skin LAB static, with shift of {Titles[mode]}') # hue_factor, brightness_factor, saturation_factor
-    plt.legend()
-    plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt.jpg')
+    # plt.xlabel(f'shift of {mode}')
+    # plt.ylabel('Value')
+    # # 定义一个字典
+    # Titles = {'H': 'hue_factor', 'B': 'brightness_factor', 'S': 'saturation_factor'}
+    # plt.title(f'Skin LAB static, with shift of {Titles[mode]}') # hue_factor, brightness_factor, saturation_factor
+    # plt.legend()
+    # plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt.jpg')
 
     # ------------------------------------------------ 亮度 ------------------------------------------------
     # 【YCbCr颜色空间分析】
@@ -152,8 +152,40 @@ if __name__ == "__main__":
     '''
     # TODO:
     '''
+    image = cv2.imread('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg')
+    # 将图片转换为YCbCr颜色空间
+    ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
+    # 分离通道
+    Y, Cr, Cb = cv2.split(ycbcr_image)
+    '''
+    # 最值
+    # Y:  0   - 234
+    # Cb: 93  - 132
+    # Cr: 125 - 187
+    '''
+    # 归一化（-1.0 - 1.0）
+    Cb = (Cb/255-0.5)*2.0
+    Cr = (Cr/255-0.5)*2.0
+    
+    # 绘制肤色线
+    angle = 33
+    angle_rad = np.deg2rad(angle)
+    x = np.array([-0.5, 0])
+    y = -1.0 * (1.0/np.tan(np.deg2rad(angle))) * x # 肤色线
+    plt.plot(x, y, c='r')
 
+    # 绘制矢量点
+    Cb_Cr = np.dstack((Cb, Cr)) # 将Cb和Cr通道合并成一个二维数组
+    points = Cb_Cr.reshape((-1, 2)) # 将二维数组展平
+    plt.scatter(points[:, 0], points[:, 1], s=1, c='b')
+    plt.xlabel('Cb')
+    plt.ylabel('Cr')
+    plt.xlim(-0.5, 0.5)
+    plt.ylim(-0.5, 0.5)
 
+    plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt_Cb_Cr.jpg')
+
+    print(1.0/np.tan(np.deg2rad(33)))
 
    # ---------------------------------------------- 清晰度 -------------------------------------------------
     '''
@@ -164,7 +196,7 @@ if __name__ == "__main__":
     print(f"磨皮磨去量：{sum_diff}")
     '''
 
-    # 计算正态分布高斯核
-    compute_gaussian()
+    # # 计算正态分布高斯核
+    # compute_gaussian()
     
 
