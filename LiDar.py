@@ -1,10 +1,7 @@
 
 
 '''
-功能: 将软件中导出的raw深度图文件转为俯视距离图，并保存为png格式
-Author: swortain
-Date: 2021-12-31 17:45:22
-LastEditTime: 2022-01-22 14:40:25
+功能: 将rgb图片转为亮度波形图(亮度累加)
 '''
 import matplotlib.pyplot as plt
 import numpy as np
