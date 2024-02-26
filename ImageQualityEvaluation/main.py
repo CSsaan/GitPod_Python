@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from skinSeg import *
 from Rgb2CIELab import ImageProcessingLab
 from adjustHSL import adjust_image_hls
+from YCbCrCalculate import *
 
 # 统计LAB函数
 def skin_statistics(skin_image, adjust_name, hist_normal=False):
@@ -152,7 +153,7 @@ if __name__ == "__main__":
     '''
     # TODO:
     '''
-    image = cv2.imread('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg')
+    image = cv2.imread('/workspace/GitPod_Python/srcImg/R.jpg')
     # 将图片转换为YCbCr颜色空间
     ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
     # 分离通道
@@ -182,10 +183,14 @@ if __name__ == "__main__":
     plt.ylabel('Cr')
     plt.xlim(-0.5, 0.5)
     plt.ylim(-0.5, 0.5)
-
     plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt_Cb_Cr.jpg')
 
-    print(1.0/np.tan(np.deg2rad(33)))
+    # 所有点到肤色线距离的均值、方差
+    distances = [distance_to_line(point) for point in points]
+    mean_distance = np.mean(distances)
+    print(f"所有点到肤色线距离的均值: {mean_distance}") # 0.009888889423432185  0.014233683490722569   0.05255234247025969
+    var_distance = np.var(distances)
+    print(f"所有点到肤色线距离的方差: {var_distance}")  # 0.000172123749531560  0.000214972264202749   0.002064519275832806
 
    # ---------------------------------------------- 清晰度 -------------------------------------------------
     '''
