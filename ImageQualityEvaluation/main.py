@@ -211,7 +211,7 @@ if __name__ == "__main__":
     # TODO:
     '''
     skin_image = cv2.imread('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg')
-    # 统计不同色度、亮度、饱和度的A\B\AB均值
+    # 统计不同色度、亮度、饱和度的肤色距离均值、方差
     mode = 'S' # Hue, Brightness, Saturation
     all_Mean, all_Var = static_all_skinLine(skin_image, use_HBS=mode)
     # 绘制多组点图\折线
