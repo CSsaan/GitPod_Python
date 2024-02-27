@@ -104,6 +104,63 @@ def compute_gaussian():
         print('')
         print(all)
 
+def static_all_skinLine(skin_image, use_HBS):
+    '''
+    use_HBS: H : hue_factor, B : brightness_factor, S : saturation_factor
+    '''
+    all_Mean, all_Var = [], []
+    hue_factor, brightness_factor, saturation_factor = 0.0, 1.0, 1.0
+    random_H, random_B, random_S = 0, 0, 0
+    for shift in range(-10, 11, 2):
+        # 设置调整参数
+        if(use_HBS == 'H'):
+            # 生成-10至10之间的一个随机数
+            # random_H = random.uniform(-10, 10)
+            hue_factor = 0.0 + shift  # 色相调整值，可以是负值
+        if(use_HBS == 'B'):
+            # 生成-10至10之间的一个随机数
+            # random_B = random.uniform(-10, 10)
+            brightness_factor = 1.0 + shift*0.05 # 亮度调整值，大于1增加亮度，小于1降低亮度
+        if(use_HBS == 'S'):
+            # 生成-10至10之间的一个随机数
+            # random_S = random.uniform(-10, 10)
+            saturation_factor = 1.0 + shift*0.05 # 饱和度调整值，大于1增加饱和度，小于1降低饱和度
+        adjusted_image = adjust_image_hls(skin_image, hue_factor, brightness_factor, saturation_factor)
+        ycbcr_image = cv2.cvtColor(adjusted_image, cv2.COLOR_BGR2YCrCb)
+        adjust_name = f'h{hue_factor}_b{brightness_factor}_s{saturation_factor}'
+        # 分离通道
+        Y, Cr, Cb = cv2.split(ycbcr_image)
+        # 归一化（-1.0 - 1.0）
+        Cb = (Cb/255-0.5)*2.0
+        Cr = (Cr/255-0.5)*2.0
+        Cb_Cr = np.dstack((Cb, Cr)) # 将Cb和Cr通道合并成一个二维数组
+        points = Cb_Cr.reshape((-1, 2)) # 将二维数组展平
+
+        # 绘制肤色线
+        angle = 33
+        angle_rad = np.deg2rad(angle)
+        x = np.array([-0.5, 0])
+        y = -1.0 * (1.0/np.tan(np.deg2rad(angle))) * x # 肤色线
+        plt.plot(x, y, c='r')
+        # 绘制矢量点
+        Cb_Cr = np.dstack((Cb, Cr)) # 将Cb和Cr通道合并成一个二维数组
+        points = Cb_Cr.reshape((-1, 2)) # 将二维数组展平
+        plt.scatter(points[:, 0], points[:, 1], s=1, c='b')
+        plt.xlabel('Cb')
+        plt.ylabel('Cr')
+        plt.xlim(-0.5, 0.5)
+        plt.ylim(-0.5, 0.5)
+        plt.savefig(f'/workspace/GitPod_Python/ImageQualityEvaluation/result/Plt_Cb_Cr/{adjust_name}.jpg')
+
+        # 所有点到肤色线距离的均值、方差
+        distances = [distance_to_line(point) for point in points]
+        mean_distance = np.mean(distances) # 0.009888889423432185  0.014233683490722569   0.05255234247025969
+        var_distance = np.var(distances)   # 0.000172123749531560  0.000214972264202749   0.00206451927583280
+        print(f'{adjust_name}: {mean_distance}, {var_distance}')
+        all_Mean.append((shift, mean_distance))
+        all_Var.append((shift, var_distance))
+    return np.array(all_Mean), np.array(all_Var)
+
 if __name__ == "__main__":
     # # ------------------------------------------------ 亮度 ------------------------------------------------
     # # 【LAB颜色空间分析】
@@ -153,44 +210,30 @@ if __name__ == "__main__":
     '''
     # TODO:
     '''
-    image = cv2.imread('/workspace/GitPod_Python/srcImg/R.jpg')
-    # 将图片转换为YCbCr颜色空间
-    ycbcr_image = cv2.cvtColor(image, cv2.COLOR_BGR2YCrCb)
-    # 分离通道
-    Y, Cr, Cb = cv2.split(ycbcr_image)
-    '''
-    # 最值
-    # Y:  0   - 234
-    # Cb: 93  - 132
-    # Cr: 125 - 187
-    '''
-    # 归一化（-1.0 - 1.0）
-    Cb = (Cb/255-0.5)*2.0
-    Cr = (Cr/255-0.5)*2.0
-    
-    # 绘制肤色线
-    angle = 33
-    angle_rad = np.deg2rad(angle)
-    x = np.array([-0.5, 0])
-    y = -1.0 * (1.0/np.tan(np.deg2rad(angle))) * x # 肤色线
-    plt.plot(x, y, c='r')
-
-    # 绘制矢量点
-    Cb_Cr = np.dstack((Cb, Cr)) # 将Cb和Cr通道合并成一个二维数组
-    points = Cb_Cr.reshape((-1, 2)) # 将二维数组展平
-    plt.scatter(points[:, 0], points[:, 1], s=1, c='b')
-    plt.xlabel('Cb')
-    plt.ylabel('Cr')
-    plt.xlim(-0.5, 0.5)
-    plt.ylim(-0.5, 0.5)
-    plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt_Cb_Cr.jpg')
-
-    # 所有点到肤色线距离的均值、方差
-    distances = [distance_to_line(point) for point in points]
-    mean_distance = np.mean(distances)
-    print(f"所有点到肤色线距离的均值: {mean_distance}") # 0.009888889423432185  0.014233683490722569   0.05255234247025969
-    var_distance = np.var(distances)
-    print(f"所有点到肤色线距离的方差: {var_distance}")  # 0.000172123749531560  0.000214972264202749   0.002064519275832806
+    skin_image = cv2.imread('/workspace/GitPod_Python/ImageQualityEvaluation/result/face5-l_skinSeg_closed.jpg')
+    # 统计不同色度、亮度、饱和度的A\B\AB均值
+    mode = 'S' # Hue, Brightness, Saturation
+    all_Mean, all_Var = static_all_skinLine(skin_image, use_HBS=mode)
+    # 绘制多组点图\折线
+    colors = ['b', 'g']
+    names = ['Mean', 'Var']
+    _ALL_ = [all_Mean, all_Var]
+    for i, dataset in enumerate(_ALL_):
+        x, y = dataset[:, 0], dataset[:, 1]
+        plt.scatter(x, y, color=colors[i], label=names[i]) # 绘制点
+        plt.plot(x, y, color=colors[i]) # 绘制折线
+        # 拟合曲线
+        z = np.polyfit(x, y, 1)
+        p = np.poly1d(z)
+        plt.plot(x, p(x), color=colors[i], linestyle='dashed')
+        
+    plt.xlabel(f'shift of {mode}')
+    plt.ylabel('Value')
+    # 定义一个字典
+    Titles = {'H': 'hue_factor', 'B': 'brightness_factor', 'S': 'saturation_factor'}
+    plt.title(f'Skin LAB static, with shift of {Titles[mode]}') # hue_factor, brightness_factor, saturation_factor
+    plt.legend()
+    plt.savefig('/workspace/GitPod_Python/ImageQualityEvaluation/result/plt.jpg')
 
    # ---------------------------------------------- 清晰度 -------------------------------------------------
     '''

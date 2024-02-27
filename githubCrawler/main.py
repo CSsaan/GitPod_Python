@@ -273,7 +273,11 @@ class ReadmeFileReader:
         )
 
     def get_one_readme_file(self, project_dir):
-        readme_file = next((file for file in os.listdir(project_dir) if file.lower() == 'readme.md'), None)
+        readme_file = None
+        try:
+            readme_file = next((file for file in os.listdir(project_dir) if file.lower() == 'readme.md'), None)
+        except FileNotFoundError:
+            readme_file = next((file for file in os.listdir(project_dir) if file.lower().startswith('readme.')), None)
         content = None
         if readme_file is not None:
             with open(os.path.join(project_dir, readme_file), 'r', encoding='utf-8') as f:
