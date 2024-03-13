@@ -11,6 +11,8 @@ class VideoProcessor:
             raise FileNotFoundError("视频文件不存在")
         self.video_path = video_path
         self.cap = cv2.VideoCapture(video_path)
+        self.video_writer = None
+        self.init_video_bool = False
     
     def get_cap_status(self):
         return self.cap.isOpened()
@@ -67,10 +69,47 @@ class VideoProcessor:
 
     def save_image(self, image, filename):
         cv2.imwrite(filename, image)
+
+    def init_video_writer(self, height, width, output_path, fps=30):
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        self.video_writer = cv2.VideoWriter(output_path, fourcc, fps, (width, height), True)
+        self.init_video_bool = True
+    
+    def count_frames(self):
+        total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        return total_frames
+
+    def save_video(self, frame, output_path):
+        if(self.init_video_bool == False):
+            height, width, _ = frame.shape
+            self.init_video_writer(height, width, output_path, fps=30)
+        try:
+            self.video_writer.write(frame)
+        except Exception as e:
+            print(e)
+            self.video_writer.release()
     
     def quite_cap(self):
         self.cap.release()
 
+def images_to_video(input_folder, output_path, fps=30):
+    image_files = [f for f in os.listdir(input_folder) if f.endswith('.jpg')]
+
+    if not image_files:
+        print("文件夹中没有图片文件！")
+        return
+
+    first_image = cv2.imread(os.path.join(input_folder, image_files[0]))
+    height, width, _ = first_image.shape
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+
+    for image_file in image_files:
+        image_path = os.path.join(input_folder, image_file)
+        frame = cv2.imread(image_path)
+        out.write(frame)
+
+    out.release()
 
 if __name__ == "__main__":
     # 进行单帧效果测试
@@ -82,8 +121,8 @@ if __name__ == "__main__":
         video_processor0 = VideoProcessor('/workspace/GitPod_Python/skinMaskProcess/dataset/origin.mp4')
         frame0 = video_processor0.get_frame(frame_n)
         video_processor0.save_image(frame0, f'/workspace/GitPod_Python/skinMaskProcess/result/origin_{frame_n}.jpg')
-
-        skin_YCrCb, distance = YCrCbSkin(frame0)
+        # 
+        skin_YCrCb, distance = MaxHSVYCbCrSkin(frame0)
         video_processor0.save_image(distance, f'/workspace/GitPod_Python/skinMaskProcess/result/distance_{frame_n}.jpg')
         video_processor0.save_image(skin_YCrCb, f'/workspace/GitPod_Python/skinMaskProcess/result/origin_{frame_n}_skin.jpg')
 
@@ -108,32 +147,40 @@ if __name__ == "__main__":
         blurred_mask = video_processor.gaussian_blur(mergeMask, kernel_size=21)
         video_processor.save_image(blurred_mask, f'/workspace/GitPod_Python/skinMaskProcess/result/mergeMaskBlurred_{frame_n}.jpg')
 
-        # LUT调色
-        # 根据mask融合两张图
-        height, width, _ = frame0.shape
-        red_image = np.full((height, width, 3), (0, 0, 255), dtype=np.uint8)
-        result = video_processor.blend_images(red_image, frame0, 0.5)
-        video_processor.save_image(result, f'/workspace/GitPod_Python/skinMaskProcess/result/result_{frame_n}.jpg')
+        # # LUT调色
+        # # 根据mask融合两张图
+        # height, width, _ = frame0.shape
+        # red_image = np.full((height, width, 3), (0, 0, 255), dtype=np.uint8)
+        # result = video_processor.blend_images(red_image, frame0, 0.5)
+        # video_processor.save_image(result, f'/workspace/GitPod_Python/skinMaskProcess/result/result_{frame_n}.jpg')
 
     # 进行所有帧效果测试
     else:
         print("Processing all frames...")
-        # 创建一个名为Frame的窗口，并设置窗口大小
-        cv2.namedWindow('Frame', cv2.WINDOW_NORMAL)
-        cv2.resizeWindow('Frame', 620*2, 1080)  # 设置窗口大小为800x600
+        # # 创建一个名为Frame的窗口，并设置窗口大小
+        # cv2.namedWindow('Frame', cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow('Frame', 620*2, 1080)  # 设置窗口大小为800x600
         frame_n = 1 # AI视频帧定位
 
         video_processor = VideoProcessor('./skinMaskProcess/dataset/AImask.avi') # AI视频加载器
         video_processor0 = VideoProcessor("./skinMaskProcess/dataset/origin.mp4") # 原视频加载器
+
+        total_frames = video_processor0.count_frames()
+
         while video_processor0.get_cap_status():
             frame0 = video_processor0.get_frame()
-            skin_YCrCb, distance = YCrCbSkin(frame0)
+            skin_YCrCb, distance = MaxHSVYCbCrSkin(frame0)
 
-            frameAI = video_processor.get_frame(frame_n)
+            try:
+                frameAI = video_processor.get_frame(frame_n)
+            except:
+                print("AI视频帧定位失败")
+                break
             frame_n += 1
+            print("\r" + f'{frame_n}/{total_frames}' + "\r")
             frame = video_processor.filter_green(frameAI)
             binarize_frame = video_processor.binarize_image(frame, threshold=1)
-            dilated_mask = video_processor.dilate_image(binarize_frame, kernel_size=121)
+            dilated_mask = video_processor.dilate_image(binarize_frame, kernel_size=81)
             mergeMask = video_processor.merge_mask(skin_YCrCb, distance, binarize_frame, dilated_mask)
             mergeMask = video_processor.gaussian_blur(mergeMask, kernel_size=5)
 
@@ -149,15 +196,30 @@ if __name__ == "__main__":
             blended[:, :, 2] = frame0[:, :, 2] * (1 - mergeMask) + red_image[:, :, 2] * mergeMask
 
             result = cv2.hconcat([frameAI, blended])
-            # 显示查看一下
-            cv2.imshow("Frame", skin_YCrCb)
-            key = cv2.waitKey(30)
-            if key == ord('q') or key == 27:
-                print("Exiting...")
-                video_processor0.quite_cap()
-                cv2.destroyAllWindows()
-                break
+            # resize
+            result = cv2.resize(result, (960, 1080))
+            print(result.shape)
+            # # 保存每一帧
+            video_processor0.save_image(result, f'/workspace/GitPod_Python/skinMaskProcess/result/frames/{frame_n-1:05d}.jpg')
+            # 保存视频
+            # video_processor0.save_video(result, '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4')
+            
+  
+            # # 显示查看一下
+            # cv2.imshow("Frame", skin_YCrCb)
+            # key = cv2.waitKey(30)
+            # if key == ord('q') or key == 27:
+            #     print("Exiting...")
+            #     video_processor0.quite_cap()
+            #     video_processor.quite_cap()
+            #     cv2.destroyAllWindows()
+            #     break
 
-        # 释放视频对象和关闭窗口
-        video_processor0.quite_cap()
-        cv2.destroyAllWindows()
+        # 将文件夹下所有图片保存为mp4
+        print("saving video...")
+        images_to_video('/workspace/GitPod_Python/skinMaskProcess/result/frames', '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4')
+
+        # # 释放视频对象和关闭窗口
+        # video_processor0.quite_cap()
+        # video_processor.quite_cap()
+        # cv2.destroyAllWindows()

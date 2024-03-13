@@ -39,13 +39,11 @@ def YCrCbSkin(my_texture):
     distance = distance / 102.0
     # opencv将图像转为0-255 int类型
     distance = cv2.convertScaleAbs(distance, alpha=(255.0))
-    
     # 黑白取反
-    distance = 220 - distance
+    distance = 255 - distance
     return img_skin, distance
 
 def HSVSkin(my_texture):
-    
     img_skin = np.copy(my_texture)
     my_texture = cv2.cvtColor(my_texture, cv2.COLOR_BGR2RGB)
     img_hsv = cv2.cvtColor(my_texture, cv2.COLOR_RGB2HSV)
@@ -59,7 +57,50 @@ def HSVSkin(my_texture):
     condition = (H>=0.0 + shift) & (H<=20.0 - shift) & (S>=48.0 + shift) & (V>=50.0 + shift)
     # 满足skin_region条件，则是原图像素，否则是黑色
     img_skin[~(condition)] = [0, 0, 0]
-    return img_skin
+    # 计算颜色距离
+    h_diff = np.abs(H - (0.0+20.0)*0.5)
+    s_diff = np.abs(S - (48.0+250.0)*0.5)
+    V_diff = np.abs(V - (50.0+250.0)*0.5)
+    distance = np.sqrt(h_diff**2 + s_diff**2 + V_diff**2)
+    print("distance MAX min:", distance.max(), distance.min())
+    distance = distance / 243.0
+    # opencv将图像转为0-255 int类型
+    distance = cv2.convertScaleAbs(distance, alpha=(255.0))
+    # 黑白取反
+    distance = 255 - distance
+    return img_skin, distance
+
+def MaxHSVYCbCrSkin(my_texture):
+    img_skin = np.copy(my_texture)
+    img_hsv = cv2.cvtColor(my_texture, cv2.COLOR_BGR2HSV)
+    img_YCrCb = cv2.cvtColor(my_texture, cv2.COLOR_BGR2YCrCb)
+    H = img_hsv[:,:,0]
+    S = img_hsv[:,:,1]
+    V = img_hsv[:,:,2]
+    shift = 0.0 # 控制范围
+    condition1 = (H>=0.0 + shift) & (H<=20.0 - shift) & (S>=48.0 + shift) & (V>=50.0 + shift)
+    Cb = img_YCrCb[:, :, 1]
+    Cr = img_YCrCb[:, :, 2]
+    condition2 = (Cb >= 133.0 + shift) & (Cb <= 173.0 - shift) & (Cr >= 77.0 + shift) & (Cr <= 127.0 - shift)
+    img_skin[~(condition1 | condition2)] = [0, 0, 0]
+    # # 看图
+    # img_ = np.copy(V)
+    # img_[~((Cb >= 133.0 + shift) & (Cb <= 173.0 - shift))] = [0]
+    # cv2.imwrite(f'/workspace/GitPod_Python/skinMaskProcess/result/S_skin.jpg', img_)
+    # 计算颜色距离
+    h_diff = np.abs(H - (0.0+20.0)*0.5)
+    s_diff = np.abs(S - (48.0+250.0)*0.5)
+    V_diff = np.abs(V - (50.0+250.0)*0.5)
+    cb_diff = np.abs(Cb - (133.0+173.0)*0.5)
+    cr_diff = np.abs(Cr - (77.0+127.0)*0.5)
+    distance = np.sqrt(h_diff**2 + s_diff**2 + V_diff**2 + cb_diff**2 + cr_diff**2)
+    print("distance MAX min:", distance.max(), distance.min())
+    distance = distance / 246.0
+    # opencv将图像转为0-255 int类型
+    distance = cv2.convertScaleAbs(distance, alpha=(255.0))
+    # 黑白取反
+    distance = 255 - distance
+    return img_skin, distance
 
 def SkinInsight(imageA, imageB):
     imageB = imageB.astype('float32')
