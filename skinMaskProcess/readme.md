@@ -18,13 +18,32 @@
         - HSV颜色空间法；
         - HSV+YCbCr法；
         - HSV+YCbCr阈值优化。
+
+（从左至右依次是*原图*,*RGB颜色空间法*，*HSV颜色空间法*,*YCrCb颜色空间法*）
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/origin_426.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/RGB_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/HSV_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/HSVYCbCr_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+   
+   > RGB阈值分割更加宽松，HSV阈值分割更加严格, YCbCr阈值分割效果适中。
+
    - AI+传统mask融合后处理：
         - 形态学处理；
         - 区域合并；
         - 边缘平滑；
 
+（从左至右依次是*AI原始mask*,*膨胀后*，*AI+传统区域合并*,*边缘平滑*）
+   <div style="display: flex; justify-content: center;">
+      <img src="./images/AImask_426_binarize.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/AImask_426_dilated.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/mergeMask_426.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/mergeMaskBlurred_426.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+
 以下为其他思路，暂未实现。
-   - *时间序列法（考虑前后帧间信息）*
+   - *时间序列法（考虑前后帧间信息）：避免帧间闪烁*
 
 
 # 二. 处理方法与结果分析

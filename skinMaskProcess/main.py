@@ -113,10 +113,10 @@ def images_to_video(input_folder, output_path, fps=30):
 
 if __name__ == "__main__":
     # 进行单帧效果测试
-    USE_SINGLE_TEST = False
+    USE_SINGLE_TEST = True
     if USE_SINGLE_TEST:
         print("Single Test")
-        frame_n = 1
+        frame_n = 426
         # 拿取原视频第 frame_n 帧
         video_processor0 = VideoProcessor('/workspace/GitPod_Python/skinMaskProcess/dataset/origin.mp4')
         frame0 = video_processor0.get_frame(frame_n)

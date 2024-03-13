@@ -17,7 +17,7 @@ def RGBSkin(my_texture):
     B = result[:,:,0]
     condition = (R>240) & (G>210) & (B>234)
     result[condition] = [0, 0, 0]
-    return result
+    return result, result
 
 def YCrCbSkin(my_texture): 
     # opencv转YCrCb
@@ -53,7 +53,7 @@ def HSVSkin(my_texture):
     S = img_hsv[:,:,1]
     V = img_hsv[:,:,2]
     print("H MAX min:", H.max(), H.min(),"S MAX min:", S.max(), S.min(),"V MAX min:", V.max(), V.min())
-    shift = 2.0 # 控制范围
+    shift = 0.0 # 控制范围
     condition = (H>=0.0 + shift) & (H<=20.0 - shift) & (S>=48.0 + shift) & (V>=50.0 + shift)
     # 满足skin_region条件，则是原图像素，否则是黑色
     img_skin[~(condition)] = [0, 0, 0]
