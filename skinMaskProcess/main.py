@@ -18,7 +18,7 @@ class VideoProcessor:
         return self.cap.isOpened()
 
     def get_frame(self, frame_number=None):
-        if(frame_number != None):
+        if(frame_number is not None):
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, frame_number)
         ret, frame = self.cap.read()
         if not ret:
@@ -79,10 +79,10 @@ class VideoProcessor:
         total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         return total_frames
 
-    def save_video(self, frame, output_path):
+    def save_video(self, frame, output_path, fps=30):
         if(self.init_video_bool == False):
             height, width, _ = frame.shape
-            self.init_video_writer(height, width, output_path, fps=30)
+            self.init_video_writer(height, width, output_path, fps)
         try:
             self.video_writer.write(frame)
         except Exception as e:
@@ -202,7 +202,7 @@ if __name__ == "__main__":
             # # 保存每一帧
             video_processor0.save_image(result, f'/workspace/GitPod_Python/skinMaskProcess/result/frames/{frame_n-1:05d}.jpg')
             # 保存视频
-            # video_processor0.save_video(result, '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4')
+            # video_processor0.save_video(result, '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4', fps=30)
             
   
             # # 显示查看一下
@@ -217,7 +217,7 @@ if __name__ == "__main__":
 
         # 将文件夹下所有图片保存为mp4
         print("saving video...")
-        images_to_video('/workspace/GitPod_Python/skinMaskProcess/result/frames', '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4')
+        images_to_video('/workspace/GitPod_Python/skinMaskProcess/result/frames', '/workspace/GitPod_Python/skinMaskProcess/result/output_video.mp4', fps=30)
 
         # # 释放视频对象和关闭窗口
         # video_processor0.quite_cap()
