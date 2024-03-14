@@ -116,7 +116,7 @@ if __name__ == "__main__":
     USE_SINGLE_TEST = True
     if USE_SINGLE_TEST:
         print("Single Test")
-        frame_n = 426
+        frame_n = 94
         # 拿取原视频第 frame_n 帧
         video_processor0 = VideoProcessor('/workspace/GitPod_Python/skinMaskProcess/dataset/origin.mp4')
         frame0 = video_processor0.get_frame(frame_n)
