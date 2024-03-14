@@ -53,62 +53,67 @@
 
 # 三. 结果分析
 
-## 1.皮肤分割：   
-机器上效果（*从左至右依次是AI mask结果，融合后结果*）
+## 1.机器上效果（*从左至右依次是AI mask结果，融合后结果*）
    <div style="display: flex; justify-content: center;">
       <img src="./images/AI.png" style="margin: 5px; max-width: 200px;" />
       <img src="./images/blue.png" style="margin: 5px; max-width: 200px;" />
    </div>
 
 
-（从左至右依次是*原图*,*RGB颜色空间法*，*HSV颜色空间法*,*YCrCb颜色空间法*）
+## 2.（从左至右依次是*原图*,*RGB颜色空间法*，*HSV颜色空间法*,*YCrCb颜色空间法*）
    <div style="display: flex; justify-content: center;">
-      <img src="./images/origin_426.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/RGB_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/HSV_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/HSVYCbCr_426_skin.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/origin_426.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/RGB_426_skin.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/HSV_426_skin.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/HSVYCbCr_426_skin.jpg" style="margin: 5px; max-width: 100px;" />
    </div>
    
    > RGB阈值分割更加宽松，HSV阈值分割更加严格, YCbCr阈值分割效果适中。
 
-（从左至右依次是*AI原始mask*,*膨胀后*，*AI+传统区域合并*,*边缘平滑*）
+## 3.（从左至右依次是*AI原始mask*,*膨胀后*，*AI+传统区域合并*,*边缘平滑*）
    <div style="display: flex; justify-content: center;">
-      <img src="./images/AImask_426_binarize.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/AImask_426_dilated.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/mergeMask_426.jpg" style="margin: 5px; max-width: 200px;" />
-      <img src="./images/mergeMaskBlurred_426.jpg" style="margin: 5px; max-width: 200px;" />
+      <img src="./images/AImask_426_binarize.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/AImask_426_dilated.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/mergeMask_426.jpg" style="margin: 5px; max-width: 100px;" />
+      <img src="./images/mergeMaskBlurred_426.jpg" style="margin: 5px; max-width: 100px;" />
    </div>
    
    > AI+传统区域合并后，扩充AI原始mask，扩充范围受膨胀核大小影响。
 
 ## 2.对比试验
+
 ### 1.不同膨胀核大小对mask融合的影响
+
 （从左至右依次是*dilate21*,*dilate41*）
    <div style="display: flex; justify-content: center;">
       <img src="./images/dilate_21.jpg" style="margin: 5px; max-width: 200px;" />
       <img src="./images/dilate_41.jpg" style="margin: 5px; max-width: 200px;" />
    </div>
 （从左至右依次是*dilate61*,*dilate81*,*dilate101*）
+
    <div style="display: flex; justify-content: center;">
       <img src="./images/dilate_61.jpg" style="margin: 5px; max-width: 200px;" />
       <img src="./images/dilate_81.jpg" style="margin: 5px; max-width: 200px;" />
       <img src="./images/dilate_101.jpg" style="margin: 5px; max-width: 200px;" />
    </div>
 
-### 2.不同边缘平滑对结果的影响
+### 2.不同边缘平滑对结果的影
+（略）
 
 ### 3.几帧结果
    <div style="display: flex; justify-content: center;">
       <img src="./images/00065.jpg" style="margin: 5px; max-width: 200px;" />
       <img src="./images/00094.jpg" style="margin: 5px; max-width: 200px;" />
+   </div>
+
+   <div style="display: flex; justify-content: center;">
       <img src="./images/00171.jpg" style="margin: 5px; max-width: 200px;" />
       <img src="./images/00426.jpg" style="margin: 5px; max-width: 200px;" />
    </div>
 
-
 ``` txt
 # 可能的改进、或者致命缺点：
 1. YCbCr阈值分割：将部分非皮肤部分检测为皮肤，导致融合时出现误检。
-2. 膨胀核大小不好确定：对于AI少部分漏检情况，可以很好补全皮肤边缘；相反则受膨胀核大小影响。
+2. 膨胀核大小不好确定：对于AI少部分漏检情况，可以很好补全皮肤边缘；相反，例如额头部分，则受膨胀核大小影响。
 
 ```
