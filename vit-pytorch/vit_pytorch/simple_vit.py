@@ -79,6 +79,33 @@ class Transformer(nn.Module):
 
 class SimpleViT(nn.Module):
     def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels = 3, dim_head = 64):
+        """
+        《Vision Transformer》原始论文的部分作者提出了一项更新，提出了简化`ViT`的方法，使其能够更快速、更好地训练。
+        这些简化包括使用2D正弦位置嵌入、全局平均池化（无CLS标记）、无dropout、批量大小从4096减少到1024，并使用RandAugment和MixUp数据增强。
+        他们还表明，简单的线性层结尾并不明显比原始的MLP头差。
+        您可以通过导入以下方式使用`SimpleViT`。
+
+        Args:
+            `image_size`: int.  
+                Image size. If you have rectangular images, make sure your image size is the maximum of the width and height
+            `patch_size`: int.  
+                Size of patches. `image_size` must be divisible by `patch_size`.  
+                The number of patches is: ` n = (image_size // patch_size) ** 2` and `n` **must be greater than 16**.
+            `num_classes`: int.  
+                Number of classes to classify.
+            `dim`: int.  
+                Last dimension of output tensor after linear transformation `nn.Linear(..., dim)`.
+            `depth`: int.  
+                Number of Transformer blocks.
+            `heads`: int.  
+                Number of heads in Multi-head Attention layer. 
+            `mlp_dim`: int.  
+                Dimension of the MLP (FeedForward) layer. 
+            `channels`: int, default `3`.  
+                Number of image's channels. 
+            `dim_head`: int. 
+                Number of dim's head. 
+        """
         super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)

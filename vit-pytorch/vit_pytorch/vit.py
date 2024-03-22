@@ -82,6 +82,40 @@ class Transformer(nn.Module):
 
 class ViT(nn.Module):
     def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
+        """
+        实现了《Vision Transformer》的PyTorch版本，这是一种仅使用单个Transformer编码器就能在视觉分类任务中达到SOTA的简单方法。在Yannic Kilcher的视频中进一步解释了其重要性。
+        这里实际上没有太多的代码，但为了让大家更快了解这场注意力革命，还是将其展示出来。
+        关于带有预训练模型的PyTorch实现，请查看Ross Wightman的仓库[这里](https://github.com/rwightman/pytorch-image-models)。
+        官方的Jax仓库在[这里](https://github.com/google-research/vision_transformer)。
+        还有一个TensorFlow 2的翻译版本[这里](https://github.com/taki0112/vit-tensorflow)，由研究科学家Junho Kim创建！🙏
+        由Enrico Shippole进行的Flax翻译在[这里](https://github.com/conceptofmind/vit-flax)！
+
+        Args:
+            `image_size`: int.  
+                Image size. If you have rectangular images, make sure your image size is the maximum of the width and height
+            `patch_size`: int.  
+                Size of patches. `image_size` must be divisible by `patch_size`.  
+                The number of patches is: ` n = (image_size // patch_size) ** 2` and `n` **must be greater than 16**.
+            `num_classes`: int.  
+                Number of classes to classify.
+            `dim`: int.  
+                Last dimension of output tensor after linear transformation `nn.Linear(..., dim)`.
+            `depth`: int.  
+                Number of Transformer blocks.
+            `heads`: int.  
+                Number of heads in Multi-head Attention layer. 
+            `mlp_dim`: int.  
+                Dimension of the MLP (FeedForward) layer. 
+            `channels`: int, default `3`.  
+                Number of image's channels. 
+            `dim_head`: int. 
+                Number of dim's head. 
+            `dropout`: float between `[0, 1]`, default `0.`.  
+                Dropout rate. 
+            `emb_dropout`: float between `[0, 1]`, default `0`.  
+                Embedding dropout rate.
+            `pool`: string, either `cls` token pooling or `mean` pooling            
+		"""
         super().__init__()
         # 正方形的image、patch块
         image_height, image_width = pair(image_size)
