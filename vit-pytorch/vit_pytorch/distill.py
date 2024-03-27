@@ -45,6 +45,10 @@ class DistillMixin:
 
 class DistillableViT(DistillMixin, ViT):
     def __init__(self, *args, **kwargs):
+        """
+        最近的一篇论文表明，使用蒸馏令牌从卷积网络中提炼知识到视觉变换器可以产生小型高效的视觉变换器。该存储库提供了轻松进行蒸馏的方法。
+        例如，从Resnet50（或任何教师）到视觉变换器的提炼。
+        """
         super(DistillableViT, self).__init__(*args, **kwargs)
         self.args = args
         self.kwargs = kwargs
