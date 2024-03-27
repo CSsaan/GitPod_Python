@@ -10,14 +10,14 @@ def pair(t):
     return t if isinstance(t, tuple) else (t, t)
 
 def posemb_sincos_2d(h, w, dim, temperature: int = 10000, dtype = torch.float32):
-    y, x = torch.meshgrid(torch.arange(h), torch.arange(w), indexing="ij")
+    y, x = torch.meshgrid(torch.arange(h), torch.arange(w), indexing="ij") # [8*8]个位置、[8*8]个位置
     assert (dim % 4) == 0, "feature dimension must be multiple of 4 for sincos emb"
-    omega = torch.arange(dim // 4) / (dim // 4 - 1)
+    omega = torch.arange(dim // 4) / (dim // 4 - 1) # 大小变为1/4
     omega = 1.0 / (temperature ** omega)
 
-    y = y.flatten()[:, None] * omega[None, :]
+    y = y.flatten()[:, None] * omega[None, :] # [64,1] * [1,256] -> [64, 256]
     x = x.flatten()[:, None] * omega[None, :]
-    pe = torch.cat((x.sin(), x.cos(), y.sin(), y.cos()), dim=1)
+    pe = torch.cat((x.sin(), x.cos(), y.sin(), y.cos()), dim=1) # 再拼接回4倍
     return pe.type(dtype)
 
 # classes
@@ -115,9 +115,9 @@ class SimpleViT(nn.Module):
         patch_dim = channels * patch_height * patch_width
 
         self.to_patch_embedding = nn.Sequential(
-            Rearrange("b c (h p1) (w p2) -> b (h w) (p1 p2 c)", p1 = patch_height, p2 = patch_width),
+            Rearrange("b c (h p1) (w p2) -> b (h w) (p1 p2 c)", p1 = patch_height, p2 = patch_width), # [1, 3, (h*32) (w*32)] -> [1batch, (8*8)个, (32*32*3)patch像素]
             nn.LayerNorm(patch_dim),
-            nn.Linear(patch_dim, dim),
+            nn.Linear(patch_dim, dim), # [1, 64, 32*32*3] -> [1batch, 64个patch, 1024]
             nn.LayerNorm(dim),
         )
 
@@ -139,7 +139,6 @@ class SimpleViT(nn.Module):
 
         x = self.to_patch_embedding(img)
         x += self.pos_embedding.to(device, dtype=x.dtype)
-
         x = self.transformer(x)
         x = x.mean(dim = 1)
 

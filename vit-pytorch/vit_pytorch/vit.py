@@ -129,14 +129,14 @@ class ViT(nn.Module):
 
         self.to_patch_embedding = nn.Sequential(
             # [1, 3, 256, 256]
-            Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width), # [1, 3, (8*32) (8*32)] -> [1, (8*8), (32*32*3)]
+            Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width), # [1, 3, (8*32) (8*32)] -> [1batch, (8*8)个, (32*32*3)patch像素]
             nn.LayerNorm(patch_dim),
             nn.Linear(patch_dim, dim), # [1, 64, (32*32*3)] -> [1, 64, 1024]
             nn.LayerNorm(dim),
             # [1, 64, 1024]
         )
 
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, dim))
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 1, dim)) #  # [1, 64+1, 1024]
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim)) # [1, 1, 1024]
         self.dropout = nn.Dropout(emb_dropout)
 

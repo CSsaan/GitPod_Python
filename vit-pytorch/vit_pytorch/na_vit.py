@@ -185,6 +185,12 @@ class Transformer(nn.Module):
 
 class NaViT(nn.Module):
     def __init__(self, *, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0., token_dropout_prob = None):
+        """
+        提出利用注意力和掩码的灵活性，针对可变长度序列训练多分辨率图像，将其打包到单个批次中。
+        他们展示了更快的训练速度和提高的准确性，唯一的成本是在架构和数据加载方面增加了额外的复杂性。
+        他们使用分解的二维位置编码、标记丢弃，以及查询-键归一化。
+        """
+        
         super().__init__()
         image_height, image_width = pair(image_size)
 
