@@ -1,5 +1,6 @@
 #version 420 core
 precision mediump float;
+
 layout(binding = 0) uniform sampler2D tex;
 
 in vec2 uv;
@@ -31,7 +32,7 @@ vec3 rgb2hsv(vec3 RGB)
     }
     H *= 60.0;
     if (H < 0.0) H += 360.0;
-    vec3 HSV;
+    highp vec3 HSV;
     HSV.r = H/2.0;
     HSV.g = S*255.0;
     HSV.b = V*255.0;
@@ -41,17 +42,18 @@ vec3 rgb2hsv(vec3 RGB)
 // ************************************************************************************************
 void main()
 {
-        lowp vec4 textureColor = texture(tex, uv);
-        vec3 RGB255 = vec3(textureColor.rgb*255.0);
-        lowp vec3 YCbCr = RGB2YCbCr(RGB255); //0到255
-        mediump float Cb = YCbCr.y;
-        mediump float Cr = YCbCr.z;
-        if (Cr>=133.0 && Cr<=173.0 && Cb>=77.0 && Cb<=127.0) {
-            FragColor = textureColor;
-        }
-        else {
-            FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-        }
+    highp vec4 textureColor = texture(tex, uv);
+    highp vec3 RGB255 = vec3(textureColor.rgb*255.0);
+    highp vec3 YCbCr = RGB2YCbCr(RGB255); //0到255
+    float Cb = YCbCr.y;
+    float Cr = YCbCr.z;
 
-    // FragColor = texture(tex, uv);
+    vec3 result = vec3(0.0);
+    float dis = sqrt( pow(abs(Cr-153.0),2) + pow(abs(Cb-102.0),2) ); // sqrt(153^2+153^2) - 0  ;  216 - 0
+    dis = 1.0-dis/50.0;
+    result.g = dis;
+    if (Cr>=133.0 && Cr<=173.0 && Cb>=77.0 && Cb<=127.0) {
+        result.r = 1.0; //textureColor;
+    }
+    FragColor = vec4(result, 1.0);
 }

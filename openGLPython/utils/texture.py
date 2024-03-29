@@ -14,8 +14,9 @@ class Texture:
         self.innerType = innerType
         self.dataType = dataType
         self.idx = idx
+        self.imgPath = imgPath
 
-        if(imgPath is not None):
+        if(self.imgPath is not None):
             # 创建纹理对象
             self.tex = glGenTextures(1)
             glBindTexture(GL_TEXTURE_2D, self.tex)
@@ -33,7 +34,7 @@ class Texture:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
             glBindTexture(texType, GL_NONE)
         else:
             assert(h != None and w != None)
@@ -47,15 +48,14 @@ class Texture:
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
             glBindTexture(texType, GL_NONE)
+        print(f"TextureId:{self.tex}")
 
-    def useTex(self, shader, name=None):
+    def useTex(self, shader, name):
         """ 设置纹理索引 """
-        if not name:
-            name = "tex" + str(self.idx)
-        glBindTexture(GL_TEXTURE_2D, self.tex)
         glActiveTexture(GL_TEXTURE0 + self.idx)
+        glBindTexture(GL_TEXTURE_2D, self.tex)
         shader.setUniform(name, self.idx)
 
     def updateTex(self, shader, name, img):
@@ -65,5 +65,5 @@ class Texture:
         #
         glActiveTexture(GL_TEXTURE0 + self.idx)
         glBindTexture(GL_TEXTURE_2D, self.tex)
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, self.w, self.h, self.innerType, self.dataType, img)
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _h, _w, self.innerType, self.dataType, img)
         shader.setUniform(name, self.idx)

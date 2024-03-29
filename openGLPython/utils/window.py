@@ -9,6 +9,8 @@ class Window:
             raise RuntimeError("GLFW初始化失败！")
         # 创建窗口
         self.width, self.height, self.title, self.bgColor = width, height, title, bgColor
+        # 设置窗口属性
+        glfw.window_hint(glfw.SAMPLES, 4)  # 设置4倍多重采样抗锯齿
         self.window = glfw.create_window(width, height, title, None, None)
         # 显示窗口
         self.show()
@@ -19,6 +21,7 @@ class Window:
         glViewport(0, 0, self.width, self.height)
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
+        glEnable(GL_MULTISAMPLE)
 
     def loop(self, render_func):
         while not glfw.window_should_close(self.window):

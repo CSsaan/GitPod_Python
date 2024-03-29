@@ -16,6 +16,7 @@ class Shader:
             fs = shaders.compileShader(text, GL_FRAGMENT_SHADER)
 
         self.shader = shaders.compileProgram(vs, fs)
+        print('ProgramId:',self.shader)
 
     def use(self):
         glUseProgram(self.shader)
@@ -47,7 +48,5 @@ class Shader:
     def setAttrib(self, loc, size, dtype, stride, offset):
         """ 设置顶点属性链接 """
         # loc = glGetAttribLocation(self.shader, name)
-        print('self.shader:',self.shader)
-        print('loc:', loc)
         glVertexAttribPointer(loc, size, dtype, False, stride, ctypes.c_void_p(offset))
         glEnableVertexAttribArray(loc)
