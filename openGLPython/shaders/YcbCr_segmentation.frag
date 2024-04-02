@@ -55,5 +55,6 @@ void main()
     if (Cr>=133.0 && Cr<=173.0 && Cb>=77.0 && Cb<=127.0) {
         result.r = 1.0; //textureColor;
     }
+    result.g = pow(result.g+0.5, 2.0);
     FragColor = vec4(result, 1.0);
 }

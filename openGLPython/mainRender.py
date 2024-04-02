@@ -9,12 +9,15 @@ from utils.framebuffer import FBO
 import argparse
 import cv2
 import os
+import nanogui
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', default="Test CS", type=str, help="Window's name")
-parser.add_argument('--inputVideo_path', default="./resource/input.mp4", type=str, help='input a video to render frames')
+parser.add_argument('--inputVideo_path', default="./resource/origin/2.mp4", type=str, help='input a video to render frames')
+parser.add_argument('--inputMask_path', default="./resource/640/2.avi", type=str, help='input a ai mask result video to render frames')
 parser.add_argument('--save_video', default=False, type=bool, help='if save frames to a video')
-parser.add_argument('--saveVideo_path', default="./result/output.mp4", type=str, help='save frames to a video')
+parser.add_argument('--saveVideo_path', default="./result/640-2.mp4", type=str, help='save frames to a video')
+parser.add_argument('--concat_ori_result', default=False, type=bool, help='concat origin & result') 
 parser.add_argument('--save_frames', default=False, type=bool, help='if save frames to a folder')
 parser.add_argument('--saveFrames_path', default="./result/frames", type=str, help='save frames to a folder')
 parser.add_argument('--show_on_screen', default=True, type=bool, help='show result on screen')
@@ -31,12 +34,12 @@ video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 
-cap_aimask = cv2.VideoCapture("./resource/aimask.avi")
+cap_aimask = cv2.VideoCapture(args.inputMask_path)
 
 # 保存视频
 window_w, window_h = video_width, video_height # video_width//2, video_height//2
 fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-video_writer = cv2.VideoWriter(args.saveVideo_path, fourcc, fps, (window_w*2, window_h), True)
+video_writer = cv2.VideoWriter(args.saveVideo_path, fourcc, fps, (window_w*2 if args.concat_ori_result else window_w, window_h), True)
 
 # 创建窗口
 print(f"window size:[{window_w},{window_h}]")
@@ -181,8 +184,11 @@ def render():
         image = np.frombuffer(data, dtype=np.uint8).reshape(window_h, window_w, 3)
         image = cv2.flip(image, 0)
 
-        img = cv2.resize(img, (image.shape[1], image.shape[0]))
-        result = cv2.hconcat([img, image])
+        if(args.concat_ori_result):
+            img = cv2.resize(img, (image.shape[1], image.shape[0]))
+            result = cv2.hconcat([img, image])
+        else:
+            result = image
 
         try:
             if(args.save_frames):
