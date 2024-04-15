@@ -52,6 +52,6 @@ void main()
     // float ori = texture(tex, uv).r;
     // if(dilatedAI.r>0.0 && ori == 0.0)
     //     dilatedAI.r = 0.5;
-    FragColor = vec4(vec3(result), 1.0);
+    FragColor = vec4(vec3(texture(tex, vec2(uv.x, uv.y)).g), 1.0);
     // FragColor = texture(tex, uv);
 }

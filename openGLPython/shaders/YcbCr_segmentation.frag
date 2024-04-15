@@ -39,6 +39,20 @@ vec3 rgb2hsv(vec3 RGB)
     return HSV;
 }
 
+float gaussian_cul(float cb_cr, float u, float rou)
+{
+    float sq = -1.0*pow(cb_cr-u, 2.0) / (2.0*rou);
+    float res = pow(2.718281828459045, sq);
+    return res;
+}
+
+float scaled(float iColor, float Threshold, int pow_rate)
+{   
+    float up = pow((iColor+Threshold), float(pow_rate)) - pow(Threshold, float(pow_rate));
+    float down = up / (pow(1.0+Threshold, float(pow_rate))-pow(Threshold, float(pow_rate)));
+    return pow(smoothstep(0.0, 1.0, down), 2.0);
+}
+
 // ************************************************************************************************
 void main()
 {
@@ -49,12 +63,21 @@ void main()
     float Cr = YCbCr.z;
 
     vec3 result = vec3(0.0);
-    float dis = sqrt( pow(abs(Cr-153.0),2) + pow(abs(Cb-102.0),2) ); // sqrt(153^2+153^2) - 0  ;  216 - 0
-    dis = 1.0-dis/50.0;
-    result.g = dis;
-    if (Cr>=133.0 && Cr<=173.0 && Cb>=77.0 && Cb<=127.0) {
+    if (Cr>=133.0 && Cr<=173.0 && Cb>=77.0 && Cb<=127.0) 
+    {
         result.r = 1.0; //textureColor;
     }
-    result.g = pow(result.g+0.5, 2.0);
+    // float dis = sqrt( pow(abs(Cr-153.0),2) + pow(abs(Cb-102.0),2) ); // sqrt(153^2+153^2) - 0  ;  216 - 0
+    // dis = 1.0-dis/50.0;
+    // result.g = dis;
+    float gaussian_cr = gaussian_cul(Cr, 153.0, 140.0);
+    float gaussian_cb = gaussian_cul(Cb, 102.0, 216.66);
+    result.g = gaussian_cr*gaussian_cb*2.0; // pow(result.g, 2.0);
+    result.g = clamp(result.g, 0.0, 1.0);
+
+    // float Threshold = 0.5;
+    // int pow_rate = 2;
+    // result.g = scaled(result.g, Threshold, pow_rate);
+    
     FragColor = vec4(result, 1.0);
 }
