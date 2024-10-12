@@ -13,8 +13,8 @@ import nanogui
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', default="Test CS", type=str, help="Window's name")
-parser.add_argument('--inputVideo_path', default="./resource/origin/3_people.mp4", type=str, help='input a video to render frames')
-parser.add_argument('--inputMask_path', default="./resource/640/2.avi", type=str, help='input a ai mask result video to render frames')
+parser.add_argument('--inputVideo_path', default="./resource/origin/6.mp4", type=str, help='input a video to render frames')
+parser.add_argument('--inputMask_path', default="./resource/640/6.avi", type=str, help='input a ai mask result video to render frames')
 parser.add_argument('--save_video', default=False, type=bool, help='if save frames to a video')
 parser.add_argument('--saveVideo_path', default="./result/640-2.mp4", type=str, help='save frames to a video')
 parser.add_argument('--concat_ori_result', default=False, type=bool, help='concat origin & result') 
@@ -64,7 +64,7 @@ vbo = VBO(triangle, GL_STATIC_DRAW)
 vbo.bind()
 
 # Green segment
-shader = Shader("./shaders/base.vert", "./shaders/3DLUT.frag") # dilate  Green_segmentation
+shader = Shader("./shaders/toy.vert", "./shaders/toy.frag") # dilate  Green_segmentation
 shader.setAttrib(0, 3, GL_FLOAT, every_size*5, 0)
 shader.setAttrib(1, 2, GL_FLOAT, every_size*5, every_size*3)
 # normal 2D
@@ -79,14 +79,13 @@ fbo_2d = FBO(window_w, window_h)
 
 # 创建纹理
 tex = Texture(idx=0, texType=GL_TEXTURE_2D, imgType=GL_RGB, innerType=GL_RGB, dataType=GL_UNSIGNED_BYTE, w=video_width, h=video_height)
-tex_background = Texture(idx=1, imgPath="./resource/filter_skin.png")
+tex_background = Texture(idx=1, imgPath="./resource/sight.jpg")
 
 def quite_cap(self):
     cap.release()
     cap_aimask.release()
 
 # 渲染循环
-iTime = 0.0
 def render():
     # 读取每一帧
     # img = cv2.imread("./resource/sight.jpg")
@@ -106,10 +105,8 @@ def render():
     shader.use()
     glBindVertexArray(vao)
     tex.updateTex(shader, "tex", img) # 原视频纹理
-    tex_background.useTex(shader, "s_inLut") # 背景
-    global iTime
-    iTime += 0.5
-    shader.setUniform("strenth", iTime)
+    tex_background.useTex(shader, "tex_background") # 背景
+    shader.setUniform("strenth", 0.9)
     shader.setUniform("gpow", 0.5)
     glDrawArrays(GL_TRIANGLES, 0, 6)
     glBindTexture(GL_TEXTURE_2D, GL_NONE)

@@ -81,7 +81,7 @@ void main()
     }
 
     // // blur2
-    // const float R = 35.0;
+    // const float R = 15.0;
     // vec2 uv0 = vec2(uv.x, 1.0-uv.y);
 	// vec3 sum_c = texture(tex_mask, uv0).rgb;
    	// vec2 offsetx = vec2(1.0 / 1920.0, 0.0);
@@ -89,14 +89,14 @@ void main()
     // 	sum_c += texture(tex_mask, uv0 + offsetx * i).rgb * 2.0;
     //     sum_c += texture(tex_mask, uv0 - offsetx * i).rgb * 2.0;
     // }
-    // float result1 = vec4(sum_c / (800.0 * R + 1.0), 1.0).r;
+    // float result1 = vec4(sum_c / (700.0 * R + 1.0), 1.0).r;
 
    	// vec2 offsety = vec2(0.0,1.0 / 1080.0);
     // for(float i = 1.5; i <= R; i+=0.01){
     // 	sum_c += texture(tex_mask, uv0 + offsety * i).rgb * 2.0;
     //     sum_c += texture(tex_mask, uv0 - offsety * i).rgb * 2.0;
     // }
-    // float result2 = vec4(sum_c / (800.0 * R + 1.0), 1.0).r;
+    // float sum = vec4(sum_c / (700.0 * R + 1.0), 1.0).r;
 
 
     float mask = sum; // sum  result2
@@ -104,16 +104,25 @@ void main()
     vec4 srcColor = texture(tex, vec2(uv.x, 1.0-uv.y));
     vec4 whiten_dstColor = LUT8x8(srcColor, tex_lut); // 稍微提亮 +0.02
     // float mask = texture(tex_mask, vec2(uv.x, 1.0-uv.y)).r;
-    vec4 dstColor = vec4(mix(srcColor.rgb, whiten_dstColor.rgb, mask*abs(sin(strength))), 1.0); 
+    vec4 dstColor = vec4(mix(srcColor.rgb, whiten_dstColor.rgb, mask), 1.0);  // mask   mask*abs(sin(strength))
 
     //找到变化大的部分，按照变化大小进行提亮
-    float dis = distance(srcColor, dstColor);
-    float smooth_dis = smoothstep(0.0, 1.0, dis);
-    dstColor.rgb = srcColor.rgb + vec3(smooth_dis*2.0);
-    vec3 bill_white = mix(srcColor.rgb, dstColor.rgb, 0.4);
+    // float dis = distance(srcColor, dstColor);
+    // float smooth_dis = smoothstep(0.0, 1.0, dis);
+    // dstColor.rgb = srcColor.rgb + vec3(smooth_dis*2.0);
+    // vec3 bill_white = mix(srcColor.rgb, dstColor.rgb, 0.99);
     
+    // 只保存黑白mask
     // if(uv.x>0.5)
-        FragColor = vec4(vec3(bill_white), 1.0);
+        FragColor = vec4(vec3(texture(tex_mask, vec2(uv.x, 1.0-uv.y)).r), 1.0);
+    // else
+    //     FragColor = srcColor;
+
+    // // 保存 调色
+    // mask = texture(tex_mask, vec2(uv.x, 1.0-uv.y)).r;
+    // dstColor = vec4(mix(srcColor.rgb, whiten_dstColor.rgb, mask), 1.0); 
+    // if(uv.x < 0.5)
+    //     FragColor = dstColor;
     // else
     //     FragColor = srcColor;
 }

@@ -32,7 +32,7 @@ vec3 rgb2hsv(vec3 RGB)
     }
     H *= 60.0;
     if (H < 0.0) H += 360.0;
-    highp vec3 HSV;
+    vec3 HSV;
     HSV.r = H/2.0;
     HSV.g = S*255.0;
     HSV.b = V*255.0;
@@ -42,7 +42,7 @@ vec3 rgb2hsv(vec3 RGB)
 float gaussian_cul(float cb_cr, float u, float rou)
 {
     float sq = -1.0*pow(cb_cr-u, 2.0) / (2.0*rou);
-    float res = pow(2.718281828459045, sq);
+    float res = exp(sq); //pow(2.718281828459045, sq);
     return res;
 }
 
@@ -56,9 +56,9 @@ float scaled(float iColor, float Threshold, int pow_rate)
 // ************************************************************************************************
 void main()
 {
-    highp vec4 textureColor = texture(tex, uv);
-    highp vec3 RGB255 = vec3(textureColor.rgb*255.0);
-    highp vec3 YCbCr = RGB2YCbCr(RGB255); //0到255
+    vec4 textureColor = texture(tex, uv);
+    vec3 RGB255 = vec3(textureColor.rgb*255.0);
+    vec3 YCbCr = RGB2YCbCr(RGB255); //0到255
     float Cb = YCbCr.y;
     float Cr = YCbCr.z;
 
@@ -70,8 +70,8 @@ void main()
     // float dis = sqrt( pow(abs(Cr-153.0),2) + pow(abs(Cb-102.0),2) ); // sqrt(153^2+153^2) - 0  ;  216 - 0
     // dis = 1.0-dis/50.0;
     // result.g = dis;
-    float gaussian_cr = gaussian_cul(Cr, 153.0, 140.0);
-    float gaussian_cb = gaussian_cul(Cb, 102.0, 216.66);
+    float gaussian_cr = gaussian_cul(Cr, 153.0, 140.0); // mean, variance
+    float gaussian_cb = gaussian_cul(Cb, 112.0, 216.66); // mean, variance
     result.g = gaussian_cr*gaussian_cb*2.0; // pow(result.g, 2.0);
     result.g = clamp(result.g, 0.0, 1.0);
 

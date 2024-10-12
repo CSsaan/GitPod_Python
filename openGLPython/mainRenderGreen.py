@@ -18,9 +18,9 @@ parser.add_argument('--inputMask_path', default="./resource/640/2.avi", type=str
 parser.add_argument('--save_video', default=False, type=bool, help='if save frames to a video')
 parser.add_argument('--saveVideo_path', default="./result/640-2.mp4", type=str, help='save frames to a video')
 parser.add_argument('--concat_ori_result', default=False, type=bool, help='concat origin & result') 
-parser.add_argument('--save_frames', default=True, type=bool, help='if save frames to a folder')
+parser.add_argument('--save_frames', default=False, type=bool, help='if save frames to a folder')
 parser.add_argument('--saveFrames_path', default="./result/frames", type=str, help='save frames to a folder')
-parser.add_argument('--show_on_screen', default=False, type=bool, help='show result on screen')
+parser.add_argument('--show_on_screen', default=True, type=bool, help='show result on screen')
 args = parser.parse_args()
 
 ensure_directory_exists(os.path.dirname(args.saveVideo_path))

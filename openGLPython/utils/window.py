@@ -14,11 +14,21 @@ class Window:
         self.window = glfw.create_window(width, height, title, None, None)
         # 显示窗口
         self.show()
+        glViewport(0, 0, self.width, self.height)
+
+    def cbfun_callback(self, window, width, height):
+        print(f"w:{width}, h:{height}")
+        glViewport(0, 0, width, height)
 
     def show(self):
         glfw.make_context_current(self.window)
-        glfw.set_window_size_limits(self.window, self.width, self.height, self.width, self.height)
-        glViewport(0, 0, self.width, self.height)
+        
+        # 设置交换间隔为 0，以解除垂直同步
+        glfw.swap_interval(0)
+        
+        glfw.set_window_size_limits(self.window, self.width, self.height, self.width, self.height) # 固定窗口大小
+        # glfw.set_framebuffer_size_callback(self.window, self.cbfun_callback) # 调整窗口大小的回调函数
+        # glViewport(0, 0, self.width, self.height)
         glEnable(GL_CULL_FACE)
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_MULTISAMPLE)

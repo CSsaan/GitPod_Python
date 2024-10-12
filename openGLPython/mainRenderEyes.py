@@ -13,8 +13,8 @@ import nanogui
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', default="Test CS", type=str, help="Window's name")
-parser.add_argument('--inputVideo_path', default="./resource/origin/3_people.mp4", type=str, help='input a video to render frames')
-parser.add_argument('--inputMask_path', default="./resource/640/2.avi", type=str, help='input a ai mask result video to render frames')
+parser.add_argument('--inputVideo_path', default="./resource/eyesMask.mp4", type=str, help='input a video to render frames')
+parser.add_argument('--inputMask_path', default="./resource/640/6.avi", type=str, help='input a ai mask result video to render frames')
 parser.add_argument('--save_video', default=False, type=bool, help='if save frames to a video')
 parser.add_argument('--saveVideo_path', default="./result/640-2.mp4", type=str, help='save frames to a video')
 parser.add_argument('--concat_ori_result', default=False, type=bool, help='concat origin & result') 
@@ -45,16 +45,40 @@ video_writer = cv2.VideoWriter(args.saveVideo_path, fourcc, fps, (window_w*2 if 
 print(f"window size:[{window_w},{window_h}]")
 w = Window(window_w, window_h, args.project_name)
 
+# Program segment
+shader = Shader("./shaders/ToothWhiten/toothMask.vert", "./shaders/ToothWhiten/toothMask.frag") # dilate  Green_segmentation
+shader_2D = Shader("./shaders/base.vert", "./shaders/base.frag") # normal 2D
+
 # 顶点数据
-triangle = np.array(
+vert2D = np.array(
     [-1.0, -1.0, 0.0,  0.0, 1.0,
       1.0, -1.0, 0.0,  1.0, 1.0, 
       1.0,  1.0, 0.0,  1.0, 0.0,	 
      -1.0, -1.0, 0.0,  0.0, 1.0,
       1.0,  1.0, 0.0,  1.0, 0.0,	 
      -1.0,  1.0, 0.0,  0.0, 0.0	], dtype=np.float32)
-assert triangle.nbytes % (6*5) == 0, "不能被整除"
-every_size = triangle.nbytes//(6*5)
+     
+POINTS_NUM = 16
+triangle = np.array(
+      # ( x      y      z )  (  x  纹理坐标的y为1-y )
+       [-0.796, -0.069, 0.0,  0.102, 0.534,
+        -0.650, -0.397, 0.0,  0.175, 0.698,
+        -0.259, -0.379, 0.0,  0.370, 0.690,
+        -0.108,  0.207, 0.0,  0.446, 0.397,
+        -0.294,  0.466, 0.0,  0.353, 0.267,
+        -0.607,  0.379, 0.0,  0.197, 0.310,
+         0.132,  0.259, 0.0,  0.566, 0.371,
+         0.318, -0.328, 0.0,  0.659, 0.664,
+         0.604, -0.362, 0.0,  0.802, 0.681,
+         0.768, -0.069, 0.0,  0.884, 0.534,
+         0.624,  0.362, 0.0,  0.812, 0.319,
+         0.362,  0.500, 0.0,  0.681, 0.250,
+        -0.454, -0.517, 0.0,  0.273, 0.759,
+        -0.450,  0.517, 0.0,  0.275, 0.241,
+         0.442, -0.448, 0.0,  0.721, 0.724,
+         0.477,  0.517, 0.0,  0.739, 0.241 ], dtype=np.float32)
+assert triangle.nbytes % (POINTS_NUM*5) == 0, "不能被整除"
+every_size = triangle.nbytes//(POINTS_NUM*5)
 print(triangle.nbytes, every_size)
 
 # VAO & VBO
@@ -62,13 +86,14 @@ vao = glGenVertexArrays(1)
 glBindVertexArray(vao)
 vbo = VBO(triangle, GL_STATIC_DRAW)
 vbo.bind()
-
-# Green segment
-shader = Shader("./shaders/base.vert", "./shaders/3DLUT.frag") # dilate  Green_segmentation
 shader.setAttrib(0, 3, GL_FLOAT, every_size*5, 0)
 shader.setAttrib(1, 2, GL_FLOAT, every_size*5, every_size*3)
-# normal 2D
-shader_2D = Shader("./shaders/base.vert", "./shaders/base.frag")
+
+
+vao2D = glGenVertexArrays(1)
+glBindVertexArray(vao2D)
+vbo2D = VBO(vert2D, GL_STATIC_DRAW)
+vbo2D.bind()
 shader_2D.setAttrib(0, 3, GL_FLOAT, every_size*5, 0)
 shader_2D.setAttrib(1, 2, GL_FLOAT, every_size*5, every_size*3)
 
@@ -79,15 +104,15 @@ fbo_2d = FBO(window_w, window_h)
 
 # 创建纹理
 tex = Texture(idx=0, texType=GL_TEXTURE_2D, imgType=GL_RGB, innerType=GL_RGB, dataType=GL_UNSIGNED_BYTE, w=video_width, h=video_height)
-tex_background = Texture(idx=1, imgPath="./resource/filter_skin.png")
+tex_background = Texture(idx=1, imgPath="./resource/sight.jpg")
 
 def quite_cap(self):
     cap.release()
     cap_aimask.release()
 
 # 渲染循环
-iTime = 0.0
 def render():
+    # glDisable(GL_CULL_FACE)
     # 读取每一帧
     # img = cv2.imread("./resource/sight.jpg")
     global frame_n
@@ -101,17 +126,52 @@ def render():
     print("\r" + f'{frame_n}/{total_frames}')
 
     # -----------------------------------------------
+    # update VBO
+    increment = np.array(
+       # ( x      y      z )  (  x    1-y )
+       [-0.796, -0.069, 0.0,  0.102, 0.534,
+        -0.650, -0.397, 0.0,  0.175, 0.698,
+        -0.259, -0.379, 0.0,  0.370, 0.690,
+        -0.108,  0.207, 0.0,  0.446, 0.397,
+        -0.294,  0.466, 0.0,  0.353, 0.267,
+        -0.607,  0.379, 0.0,  0.197, 0.310,
+         0.132,  0.259, 0.0,  0.566, 0.371,
+         0.318, -0.328, 0.0,  0.659, 0.664,
+         0.604, -0.362, 0.0,  0.802, 0.681,
+         0.768, -0.069, 0.0,  0.884, 0.534,
+         0.624,  0.362, 0.0,  0.812, 0.319,
+         0.362,  0.500, 0.0,  0.681, 0.250,
+        -0.454, -0.517, 0.0,  0.273, 0.759,
+        -0.450,  0.517, 0.0,  0.275, 0.241,
+         0.442, -0.448, 0.0,  0.721, 0.724,
+         0.477,  0.517, 0.0,  0.739, 0.241 ], dtype=np.float32)
+    vbo.set_array(increment)
+    vbo.bind()
     # draw framebuffer [Green]
     fbo_green.bind()
     shader.use()
     glBindVertexArray(vao)
     tex.updateTex(shader, "tex", img) # 原视频纹理
-    tex_background.useTex(shader, "s_inLut") # 背景
-    global iTime
-    iTime += 0.5
-    shader.setUniform("strenth", iTime)
+    tex_background.useTex(shader, "tex_background") # 背景
+    shader.setUniform("strenth", 0.9)
     shader.setUniform("gpow", 0.5)
-    glDrawArrays(GL_TRIANGLES, 0, 6)
+    
+    indices = np.array(
+     [  2,   4,  12, 
+        4,   2,   3, 
+        7,  14,  11, 
+        0,   1,   5, 
+       12,   4,  13, 
+       12,   5,   1, 
+        5,  12,  13, 
+       11,   6,   7, 
+        8,  10,  15, 
+       10,   8,   9, 
+        8,  15,  14, 
+       11,  14,  15 ], dtype=np.int8)
+
+    glDrawElements(GL_TRIANGLES, indices.nbytes, GL_UNSIGNED_SHORT, indices)
+    # glDrawArrays(GL_TRIANGLES, 0, 6)
     glBindTexture(GL_TEXTURE_2D, GL_NONE)
     glBindVertexArray(0)
     glUseProgram(GL_NONE)
@@ -121,7 +181,7 @@ def render():
     if(not args.show_on_screen):
         fbo_2d.bind()
     shader_2D.use()
-    glBindVertexArray(vao)
+    glBindVertexArray(vao2D)
     glActiveTexture(GL_TEXTURE0)
     glBindTexture(GL_TEXTURE_2D, fbo_green.uTexture)
     shader_2D.setUniform("tex", 0)

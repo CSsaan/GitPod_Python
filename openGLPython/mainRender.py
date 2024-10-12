@@ -13,14 +13,14 @@ import nanogui
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--project_name', default="Test CS", type=str, help="Window's name")
-parser.add_argument('--inputVideo_path', default="./resource/origin/2.mp4", type=str, help='input a video to render frames')
-parser.add_argument('--inputMask_path', default="./resource/640/2.avi", type=str, help='input a ai mask result video to render frames')
-parser.add_argument('--save_video', default=False, type=bool, help='if save frames to a video')
-parser.add_argument('--saveVideo_path', default="./result/640-2.mp4", type=str, help='save frames to a video')
+parser.add_argument('--inputVideo_path', default="./resource/origin/a.mp4", type=str, help='input a video to render frames')
+parser.add_argument('--inputMask_path', default="./resource/origin/a.mp4", type=str, help='input a ai mask result video to render frames')
+parser.add_argument('--save_video', default=True, type=bool, help='if save frames to a video')
+parser.add_argument('--saveVideo_path', default="./result/result_19m.mp4", type=str, help='save frames to a video')
 parser.add_argument('--concat_ori_result', default=False, type=bool, help='concat origin & result') 
-parser.add_argument('--save_frames', default=False, type=bool, help='if save frames to a folder')
+parser.add_argument('--save_frames', default=True, type=bool, help='if save frames to a folder')
 parser.add_argument('--saveFrames_path', default="./result/frames", type=str, help='save frames to a folder')
-parser.add_argument('--show_on_screen', default=True, type=bool, help='show result on screen')
+parser.add_argument('--show_on_screen', default=False, type=bool, help='show result on screen')
 args = parser.parse_args()
 
 ensure_directory_exists(os.path.dirname(args.saveVideo_path))
@@ -101,6 +101,7 @@ def quite_cap(self):
     cap_aimask.release()
 
 # 渲染循环
+iTime = 0.0
 def render():
     # 读取每一帧
     # img = cv2.imread("./resource/sight.jpg")
@@ -113,6 +114,8 @@ def render():
         raise ValueError("无法读取视频帧")
     frame_n += 1
     print("\r" + f'{frame_n}/{total_frames}')
+
+    # glViewport(0, 0, window_w//4, window_h//4)
 
     # -----------------------------------------------
     # draw framebuffer [YCbCr]
@@ -144,6 +147,7 @@ def render():
     glUseProgram(GL_NONE)
     fbo_dilate.unbind()
 
+    # glViewport(0, 0, window_w, window_h)
     # -----------------------------------------------
     # draw framebuffer [lut]
     fbo_lut.bind()
@@ -157,6 +161,10 @@ def render():
     shader_lut.setUniform("tex_mask", 1)
     #
     tex_lut.useTex(shader_lut, "tex_lut")
+    #
+    global iTime
+    iTime += 0.5
+    shader_lut.setUniform("strength", iTime)
     #
     glDrawArrays(GL_TRIANGLES, 0, 6)
     glBindTexture(GL_TEXTURE_2D, GL_NONE)
